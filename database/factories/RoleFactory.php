@@ -17,8 +17,8 @@ class RoleFactory extends Factory
             'slug' => $this->faker->unique()->randomElement(['admin','checker']),
             'description' => $this->faker->sentence(),
             'permissions' => json_encode($this->faker->randomElements(
-                ['manage_events', 'manage_users', 'validate_tickets', 'scan_qr_codes', 'view_ticket_details', 'generate_reports', 'manage_settings'],
-                $this->faker->numberBetween(1,7))
+                ['view_statistics','view_reports','view_redemptions_history','validate_tickets','check_ticket_status'],
+                $this->faker->numberBetween(1,5))
             ),
             'is_active' => $this->faker->boolean(90),
         ];

@@ -19,13 +19,9 @@ class RoleSeeder extends Seeder
                 'slug' => 'admin',
                 'description' => 'Event Organizer with full permissions',
                 'permissions' => [
-                    'manage_events',
-                    'manage_users',
-                    'validate_tickets',
-                    'scan_qr_codes',
-                    'view_ticket_details',
-                    'generate_reports',
-                    'manage_settings'    
+                        'view_statistics',
+                        'view_redemptions_history',
+                        'view_reports'
                 ],
                 'is_active' => true,
             ],
@@ -35,8 +31,7 @@ class RoleSeeder extends Seeder
                 'description' => 'Content checker with limited permissions',
                 'permissions' => [ 
                     'validate_tickets',
-                    'scan_qr_codes',
-                    'view_ticket_details'
+                    'check_ticket_status'
                 ],
                 'is_active' => true,
             ],

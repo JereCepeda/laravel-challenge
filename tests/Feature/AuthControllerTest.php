@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
 use App\Services\UserValidationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Laravel\Passport\Passport; // Agregar esta importación
+use Laravel\Passport\Passport; 
 
 uses(RefreshDatabase::class);
 
@@ -236,7 +236,6 @@ test('authenticated user can access profile', function () {
     ]);
     $user->load('role');
 
-    // Usar Passport::actingAs en lugar de actingAs
     Passport::actingAs($user);
 
     $this->mock(AuthService::class, function ($mock) use ($user) {
