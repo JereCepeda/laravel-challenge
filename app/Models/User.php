@@ -23,6 +23,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role_id',
     ];
 
     /**
@@ -47,4 +48,24 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+    public function role()
+    {
+        return $this->belongsTo(Role::class);
+    }
+    public function hasPermission($permission)
+    {
+        if ($this->role) {
+            return $this->role->hasPermission($permission);
+        }
+        return false;
+    }
+    public function isAdmin()
+    {
+        return $this->role && $this->role->slug === 'admin';
+    }
+    public function isChecker()
+    {
+        return $this->role && $this->role->slug === 'checker';
+    }
+    
 }

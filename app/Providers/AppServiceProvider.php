@@ -2,7 +2,8 @@
 
 namespace App\Providers;
 
-use Laravel\Passport\Passport;
+use App\Services\AuthService;
+use App\Services\UserValidationService;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -12,7 +13,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(AuthService::class);
+        $this->app->singleton(UserValidationService::class);
     }
 
     /**
