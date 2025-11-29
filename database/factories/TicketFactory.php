@@ -17,14 +17,13 @@ class TicketFactory extends Factory
     public function definition(): array
     {
         return [
-            'ticket_code' => $this->faker->unique()->regexify('[A-Z0-9]{10}'),
+            'ticket_code' => $this->faker->unique()->regexify('TCK-[A-Z0-9]{8}'),
+            'invitation_id' => $this->faker->unique()->regexify('INV-[A-Z0-9]{8}'),
             'event_name' => $this->faker->sentence(3),
             'event_date' => $this->faker->dateTimeBetween('+1 days', '+1 year'),
-            'sector' => $this->faker->randomElement(['VIP', 'General', 'Balcony']),
+            'sector' => $this->faker->randomElement(['A1', 'B2', 'C3', 'D4']),
             'is_validated' => false,
-            'validated_at' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
+            'redeemed_ip' => $this->faker->ipv4()
         ];
     }
 }

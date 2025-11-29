@@ -85,6 +85,9 @@ class TicketValidationService
 
     public function getTicketInfo(string $ticketCode): ?Ticket
     {
+        if(empty($ticketCode)){
+            return null;
+        }
         return Ticket::where('ticket_code', $ticketCode)->first();
     }
 

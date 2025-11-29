@@ -11,25 +11,30 @@ class Ticket extends Model
 
     protected $fillable = [
         'ticket_code',
-        'invitation_id',     // AGREGAR: estabas usando este campo
+        'invitation_id',     
         'event_name',
         'event_date',
-        'sector',           // AGREGAR: estabas usando este campo
+        'sector',           
         'is_validated',
         'validated_at',
-        'validated_by',     // AGREGAR: para tracking
-        'validation_ip',    // AGREGAR: para tracking
-        'redeemed_ip'       // AGREGAR: para tracking
+        'validated_by',     
+        'validation_ip',    
+        'redeemed_ip'       
     ];
 
     protected $casts = [
         'event_date' => 'datetime',
         'is_validated' => 'boolean',
-        'validated_at' => 'datetime'
+        'validated_at' => 'datetime',
+        'redeemed_at' => 'datetime',
     ];
 
     public function validator()
     {
         return $this->belongsTo(User::class, 'validated_by');
+    }
+    public function invitation()
+    {
+        return $this->belongsTo(InvitationRedemption::class, 'invitation_id');
     }
 }

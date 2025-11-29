@@ -56,7 +56,6 @@ class TicketController extends Controller
 
     public function validateTicket(ValidateTicketRequest $request): JsonResponse
     {
-        
         $ticketCode = $request->validated()['ticket_code'];
 
         try {
