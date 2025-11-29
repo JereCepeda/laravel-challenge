@@ -6,8 +6,9 @@ use Illuminate\Http\JsonResponse;
 use App\Exceptions\TicketException;
 use App\Exceptions\InvitationException;
 use App\Exceptions\ExternalApiException;
+use App\Http\Requests\RedeemInvitationRequest;
 use App\Services\Ticket\InvitationService;
-use App\Http\Requests\TicketRequest; // CAMBIAR: de RedeemInvitationRequest a TicketRequest
+use App\Http\Requests\ValidateTicketRequest;
 use App\Services\Ticket\TicketValidationService;
 
 class TicketController extends Controller
@@ -17,8 +18,9 @@ class TicketController extends Controller
         private TicketValidationService $ticketValidationService
     ) {}
 
-    public function redeemInvitation(TicketRequest $request): JsonResponse
+    public function redeemInvitation(RedeemInvitationRequest $request): JsonResponse
     {
+
         $hash = $request->validated()['hash'];
         try {
             $result = $this->invitationService->redeemInvitation($hash);
@@ -52,9 +54,9 @@ class TicketController extends Controller
         }
     }
 
-    public function validateTicket(TicketRequest $request): JsonResponse
+    public function validateTicket(ValidateTicketRequest $request): JsonResponse
     {
-        // El TicketRequest ya valida el ticket_code automáticamente
+        
         $ticketCode = $request->validated()['ticket_code'];
 
         try {

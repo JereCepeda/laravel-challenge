@@ -19,14 +19,17 @@ class TicketValidationService
                     ->first();
 
                 if (!$ticket) {
+                    $this->logValidationFailure($ticketCode, 'Ticket not found');
                     throw new TicketException('Ticket not found', 404);
                 }
 
                 if ($ticket->is_validated) {
+                    $this->logValidationFailure($ticketCode, 'Ticket already validated');
                     throw new TicketException('Ticket already validated', 409);
                 }
 
                 if ($ticket->event_date < now()) {
+                    $this->logValidationFailure($ticketCode, 'Event has already passed');
                     throw new TicketException('Event has already passed', 400);
                 }
 
