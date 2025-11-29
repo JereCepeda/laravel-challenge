@@ -17,35 +17,35 @@ class LoginRequestTest extends TestCase
     protected $user;
 
     protected function setUp(): void
-    {
-        parent::setUp();
-        
-        $this->activeRole = Role::create([
-            'name' => 'Admin',
-            'slug' => 'admin',
-            'description' => 'Admin role',
-            'permissions' => ['manage_users'],
-            'is_active' => true
-        ]);
+        {
+            parent::setUp();
+            
+            $this->activeRole = Role::create([
+                'name' => 'Admin',
+                'slug' => 'admin',
+                'description' => 'Admin role',
+                'permissions' => ['manage_users'],
+                'is_active' => true
+            ]);
 
-        $this->user = User::factory()->create([
-            'email' => 'test@example.com',
-            'role_id' => $this->activeRole->id
-        ]);
-    }
+            $this->user = User::factory()->create([
+                'email' => 'test@example.com',
+                'role_id' => $this->activeRole->id
+            ]);
+        }
 
-    public function test_login_request_validates_correct_data()
-    {
-        $request = new LoginRequest();
-        $data = [
-            'email' => 'test@example.com',
-            'password' => 'password123'
-        ];
+        public function test_login_request_validates_correct_data()
+        {
+            $request = new LoginRequest();
+            $data = [
+                'email' => 'test@example.com',
+                'password' => 'password123'
+            ];
 
-        $validator = Validator::make($data, $request->rules(), $request->messages());
+            $validator = Validator::make($data, $request->rules(), $request->messages());
 
-        $this->assertTrue($validator->passes());
-    }
+            $this->assertTrue($validator->passes());
+        }
 
     public function test_login_request_fails_with_missing_email()
     {

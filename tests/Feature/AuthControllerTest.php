@@ -67,7 +67,6 @@ test('successful login returns correct response structure', function () {
             ]);
     });
     $this->mock(AuthService::class, function ($mock) use ($user) {
-        // Este era el método faltante
         $mock->shouldReceive('authenticate')
             ->with('test@example.com', 'password123')
             ->andReturn($user);
