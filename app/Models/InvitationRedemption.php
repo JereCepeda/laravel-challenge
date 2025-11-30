@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class InvitationRedemption extends Model
 {
+    use \Illuminate\Database\Eloquent\Factories\HasFactory;
     protected $fillable = [
         'invitation_id',
         'event_name',
