@@ -82,7 +82,6 @@ class InvitationService
 
     private function checkAlreadyRedeemed(string $hash): void
     {
-        // Verificar en la tabla de redemptions
         if (InvitationRedemption::where('invitation_id', $hash)->exists()) {
             throw new InvitationException('Invitation already redeemed', Response::HTTP_CONFLICT);
         }

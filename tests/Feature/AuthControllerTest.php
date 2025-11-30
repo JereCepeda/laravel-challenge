@@ -72,7 +72,7 @@ test('successful login returns correct response structure', function () {
             ->andReturn($user);
             
         $mock->shouldReceive('generateToken')
-            ->with($user, 'API Token')  // Nota: incluir el segundo parámetro
+            ->with($user, 'API Token')
             ->andReturn('mocked-access-token-12345');
     });
 

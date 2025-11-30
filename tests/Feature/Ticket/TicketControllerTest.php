@@ -31,7 +31,6 @@ class TicketControllerTest extends TestCase
             'role_id' => $this->role->id
         ]);
         
-        // ✅ Especificar scope 'api'
         Passport::actingAs($this->user, [], 'api');
     }
 

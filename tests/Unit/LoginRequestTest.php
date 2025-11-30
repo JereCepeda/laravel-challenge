@@ -123,7 +123,7 @@ class LoginRequestTest extends TestCase
     public function test_login_request_fails_with_too_long_email()
     {
         $request = new LoginRequest();
-        $longEmail = str_repeat('a', 250) . '@example.com'; // > 255 characters
+        $longEmail = str_repeat('a', 250) . '@example.com';
         
         $data = [
             'email' => $longEmail,
