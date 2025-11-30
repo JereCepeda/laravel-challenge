@@ -32,14 +32,4 @@ class ValidateTicketRequest extends FormRequest
             'ticket_code.regex' => 'Invalid ticket code format. Expected format: TCK-XXXXXXXX'
         ];
     }
-
-    // protected function failedValidation(Validator $validator)
-    // {
-    //     throw new HttpResponseException(
-    //         response()->json([
-    //             'error' => 'Invalid ticket data',
-    //             'details' => $validator->errors()
-    //         ], 422)
-    //     );
-    // }
 }

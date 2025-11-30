@@ -7,6 +7,7 @@ use App\Events\TicketValidated;
 use App\Exceptions\TicketException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationData;
 
 class TicketValidationService
 {
@@ -42,7 +43,11 @@ class TicketValidationService
 
                 $this->logValidation($ticket, auth('api')->user());
 
-                // event(new TicketValidated($ticket));
+                event(new TicketValidated(
+                    ticket: $ticket,
+                    validator: auth('api')->user(),
+                    validationIp: request()->ip() ?? 'Unknown'
+                ));
 
                 return [
                     'ticket' => $ticket,

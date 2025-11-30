@@ -34,11 +34,6 @@ class InvitationService
                 
                 $redemption->update(['tickets_generated' => count($tickets)]);
                 
-                // Disparar Job en cola para notificaciones
-                // $ticketCodes = collect($tickets)->pluck('ticket_code')->toArray();
-                // SendTicketNotificationJob::dispatch($invitationData, $ticketCodes)
-                //     ->delay(now()->addSeconds(5));
-                
                 Log::info("Invitation redeemed successfully", [
                     'hash' => $hash,
                     'tickets_generated' => count($tickets)
@@ -68,7 +63,7 @@ class InvitationService
             'event_date' => $invitationData['event_date'],
             'sector' => $invitationData['sector'],
             'guest_count' => $invitationData['guest_count'],
-            'tickets_generated' => 0, // Se actualiza después
+            'tickets_generated' => 0,
             'redeemed_at' => now(),
             'redeemed_ip' => request()->ip(),
             'user_agent' => request()->userAgent(),
