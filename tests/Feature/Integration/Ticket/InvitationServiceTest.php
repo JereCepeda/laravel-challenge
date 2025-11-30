@@ -15,7 +15,6 @@ class InvitationServiceTest extends TestCase
 
     public function test_redeem_invitation_returns_service_structure()
     {
-        // ✅ Configurar mock ANTES de resolver el servicio
         $this->mock(ExternalApiService::class, function ($mock) {
             $mock->shouldReceive('getInvitationData')
                 ->once()
@@ -29,7 +28,6 @@ class InvitationServiceTest extends TestCase
                 ]);
         });
 
-        // ✅ Resolver el servicio DESPUÉS del mock
         $invitationService = app(InvitationService::class);
         $result = $invitationService->redeemInvitation('a8f22d');
 
@@ -87,7 +85,6 @@ class InvitationServiceTest extends TestCase
         $this->expectException(\App\Exceptions\InvitationException::class);
         $this->expectExceptionMessage('Invitation already redeemed');
         
-        // ✅ Segunda llamada usa la verificación en BD, no necesita mock
         $invitationService->redeemInvitation('a8f22d');
     }
 

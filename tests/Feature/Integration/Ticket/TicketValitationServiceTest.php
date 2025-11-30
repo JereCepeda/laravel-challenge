@@ -27,7 +27,7 @@ class TicketValidationServiceTest extends TestCase
             'name' => 'Administrator',
             'slug' => 'admin',
             'description' => 'Admin role',
-            'permissions' => ['manage_events', 'manage_users'],
+            'permissions' => ['validate_tickets','check_ticket_status'],
             'is_active' => true
         ]);
 

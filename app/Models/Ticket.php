@@ -33,8 +33,8 @@ class Ticket extends Model
     {
         return $this->belongsTo(User::class, 'validated_by');
     }
-    public function invitation()
+    public function invitationRedemption()
     {
-        return $this->belongsTo(InvitationRedemption::class, 'invitation_id');
+        return $this->belongsTo(InvitationRedemption::class, 'invitation_id', 'invitation_id');
     }
 }
