@@ -11,7 +11,7 @@ class AdminController extends Controller
 {
     public function __construct(private AdminReportService $adminReportService) {}
 
-    public function GetUsedTickets(GetUsedTicketsRequest $request, string $event_name)
+    public function getUsedTickets(GetUsedTicketsRequest $request, string $event_name)
     {
         $validated = $request->validated();
         $perPage = $validated['per_page'] ?? 15;
@@ -51,7 +51,7 @@ class AdminController extends Controller
         ], 200);
     }
 
-    public function GetRedemptionHistory(GetRedemptionHistoryRequest $request)
+    public function getRedemptionHistory(GetRedemptionHistoryRequest $request)
     {
         $validated = $request->validated();
         $perPage = $validated['per_page'] ?? 15;
