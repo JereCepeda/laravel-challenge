@@ -2,70 +2,50 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
-
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasApiTokens;
+    use HasApiTokens;
 
-    protected $with = ['role'];
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
     protected $fillable = [
-        'name',
-        'email',
-        'password',
-        'role_id',
+        'name', 'email', 'password', 'role_id', 'is_active'
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
-        'password',
-        'remember_token',
+        'password', 'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
-    }
-    public function role()
+    public function role(): BelongsTo
     {
         return $this->belongsTo(Role::class);
     }
-    public function hasPermission($permission)
+
+    /**
+     * Check if user has specific permission
+     */
+    public function hasPermission(string $permission): bool
     {
-        if ($this->role) {
-            return $this->role->hasPermission($permission);
-        }
-        return false;
+        return $this->role && 
+               $this->role->is_active && 
+               in_array($permission, $this->role->permissions);
     }
-    public function isAdmin()
+
+    /**
+     * Check if user has role
+     */
+    public function hasRole(string $roleSlug): bool
     {
-        return $this->role && $this->role->slug === 'admin';
+        return $this->role && $this->role->slug === $roleSlug;
     }
-    public function isChecker()
+
+    /**
+     * Get user permissions array
+     */
+    public function getPermissions(): array
     {
-        return $this->role && $this->role->slug === 'checker';
+        return $this->role ? $this->role->permissions : [];
     }
-    
 }

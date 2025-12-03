@@ -20,3 +20,6 @@ storage/testing/
 
 # Vendor
 /vendor/
+
+# Node modules
+/node_modules/

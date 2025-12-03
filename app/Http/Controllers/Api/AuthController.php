@@ -9,6 +9,7 @@ use App\Http\Requests\LoginRequest;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use App\Services\UserValidationService;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
@@ -41,17 +42,28 @@ class AuthController extends Controller
             $user = $this->authService->authenticate($credentials['email'], $credentials['password']);
             
             $token = $this->authService->generateToken($user, 'API Token');
+            
+            // Autenticar usuario en la sesión web
+            Auth::login($user);
+            
             Log::info('Inicio de sesión exitoso', [
                 'email' => $credentials['email'],
                 'user_id' => $user->id,
                 'role' => $user->role->slug
             ]);
 
-            return response()->json([
-                'message' => 'Login successful',
-                'user' => $user,
-                'token' => $token,
-            ], Response::HTTP_OK);
+            // Si es una petición AJAX/API, devolver JSON
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json([
+                    'message' => 'Login successful',
+                    'user' => $user,
+                    'token' => $token,
+                    'redirect_url' => route('dashboard')
+                ], Response::HTTP_OK);
+            }
+
+            // Si es una petición web, redirigir al dashboard
+            return redirect()->route('dashboard')->with('success', 'Login successful');
 
         }
         catch (\Exception $e) {
@@ -61,10 +73,14 @@ class AuthController extends Controller
                 'trace' => $e->getTraceAsString()
             ]);
 
-            return response()->json([
-                'message' => 'Internal server error',
-                'errors' => ['server' => ['An unexpected error occurred.']]
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json([
+                    'message' => 'Internal server error',
+                    'errors' => ['server' => ['An unexpected error occurred.']]
+                ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
+
+            return back()->withErrors(['email' => 'An unexpected error occurred.']);
         }
     }
     private function handleAuthenticationError(array $validationResult, string $ipAddress)
