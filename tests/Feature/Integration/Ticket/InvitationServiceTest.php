@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Integration\Ticket;
+namespace Tests\Feature\Integration\Ticket;
 
 use Tests\TestCase;
 use App\Models\Ticket;

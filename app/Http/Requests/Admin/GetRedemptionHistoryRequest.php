@@ -7,7 +7,7 @@ class GetRedemptionHistoryRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user() && $this->user()->isAdmin(); 
+        return $this->user() && $this->user()->hasRole('admin'); 
     }
 
     public function rules(): array

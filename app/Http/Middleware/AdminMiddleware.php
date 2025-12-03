@@ -18,7 +18,7 @@ class AdminMiddleware
             ], 401);
         }
 
-        if (!$request->user()->isAdmin()) {
+        if (!$request->user()->hasRole('admin')) {
             return response()->json([
                 'error' => 'Access denied',
                 'message' => 'Admin privileges required to access this resource'

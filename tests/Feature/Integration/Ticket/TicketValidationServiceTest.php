@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Integration\Ticket;
+namespace Tests\Feature\Integration\Ticket; // Cambiar esta línea
 
 use Tests\TestCase;
 use App\Models\Role;
