@@ -3,38 +3,81 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
-    public function __construct()
+    /**
+     * Dashboard principal - Carga layout con sidebar dinámico
+     */
+    public function index(Request $request)
     {
-        $this->middleware('auth');
-    }
-
-    public function index()
-    {
-    /** @var \App\Models\User $user */
-        $user = Auth::user();
+        $user = $request->user();
         $user->load('role');
         
         $permissions = $user->role->permissions ?? [];
+        $role = $user->role->slug;
         
-        return view('dashboard.index', compact('user', 'permissions'));
+        // Vista inicial según rol
+        $initialView = match($role) {
+            'admin' => 'dashboard.admin.statistics',
+            'checker' => 'dashboard.checker.scan-menu',
+            default => 'dashboard.home'
+        };
+        
+        return view('layouts.dashboard', compact('user', 'permissions', 'role', 'initialView'));
     }
-
-    public function statistics()
+    
+    /**
+     * Carga secciones del dashboard vía AJAX (SPA)
+     */
+    public function loadSection(Request $request, string $section)
     {
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
+        $user = $request->user();
         $user->load('role');
+        
+        $role = $user->role->slug;
         $permissions = $user->role->permissions ?? [];
         
-        // Verificar permisos
-        if (!in_array('view_statistics', $permissions)) {
-            abort(403, 'No tienes permisos para acceder a esta sección');
+        // Mapeo de secciones permitidas por rol
+        $allowedSections = $this->getAllowedSections($role, $permissions);
+        
+        if (!in_array($section, $allowedSections)) {
+            return response()->json([
+                'error' => 'No tienes permisos para acceder a esta sección'
+            ], 403);
         }
         
-        return view('dashboard.statistics', compact('user', 'permissions'));
+        // Construir path de vista
+        $viewPath = "dashboard.{$role}.{$section}";
+        
+        if (!view()->exists($viewPath)) {
+            return response()->json([
+                'error' => 'Sección no encontrada'
+            ], 404);
+        }
+        
+        return view($viewPath, compact('user', 'permissions'));
+    }
+    
+    /**
+     * Determina secciones permitidas según rol y permisos
+     */
+    private function getAllowedSections(string $role, array $permissions): array
+    {
+        $sections = [
+            'admin' => [
+                'statistics',
+                'reports',
+                'used-tickets',
+                'redemptions-history'
+            ],
+            'checker' => [
+                'scan-menu',
+                'redeem-invitation',
+                'validate-ticket'
+            ]
+        ];
+        
+        return $sections[$role] ?? [];
     }
 }

@@ -18,7 +18,7 @@ beforeEach(function () {
      * @var \Illuminate\Foundation\Application $this->app
     */
     $this->activeRole = Role::create([
-        'name' => 'Administrator',
+        'name' => 'Administrador',
         'slug' => 'admin',
         'description' => 'Admin role',
         'permissions' => ['manage_events', 'manage_users'],
@@ -229,6 +229,7 @@ test('authenticated user can access profile', function () {
     /** 
      * @var \Tests\TestCase $this
      * @var \Illuminate\Foundation\Application $this->app
+     * @var \App\Models\User $user
     */
     $user = User::factory()->create([
         'role_id' => $this->activeRole->id

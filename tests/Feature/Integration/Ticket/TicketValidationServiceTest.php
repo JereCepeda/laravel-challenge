@@ -24,7 +24,7 @@ class TicketValidationServiceTest extends TestCase
         parent::setUp();
         
         $this->activeRole = Role::create([
-            'name' => 'Administrator',
+            'name' => 'Administrador',
             'slug' => 'admin',
             'description' => 'Admin role',
             'permissions' => ['validate_tickets','check_ticket_status'],

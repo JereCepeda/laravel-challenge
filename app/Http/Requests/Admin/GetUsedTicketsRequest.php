@@ -7,12 +7,14 @@ class GetUsedTicketsRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user() && $this->user()->hasRole('admin');
+        // El middleware 'admin:admin' ya validó el rol
+        return true;
     }
 
     public function rules(): array
     {
         return [
+            'event_name' => 'nullable|string|max:255',
             'sector' => 'sometimes|string|max:50',
             'from_date' => 'sometimes|date|before_or_equal:today',
             'to_date' => 'sometimes|date|after_or_equal:from_date',

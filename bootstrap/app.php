@@ -17,6 +17,15 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => AdminMiddleware::class,
         ]);
         
+        // Habilitar CORS
+        $middleware->web(append: [
+            \Illuminate\Http\Middleware\HandleCors::class,
+        ]);
+        
+        $middleware->api(prepend: [
+            \Illuminate\Http\Middleware\HandleCors::class,
+        ]);
+        
         // Configure auth redirect
         $middleware->redirectGuestsTo(fn () => route('auth.login'));
     })

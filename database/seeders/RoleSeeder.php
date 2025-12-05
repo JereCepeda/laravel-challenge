@@ -15,7 +15,7 @@ class RoleSeeder extends Seeder
     {
         $roles = [
             [
-                'name' => 'Administrator',
+                'name' => 'Administrador',
                 'slug' => 'admin',
                 'description' => 'Event Organizer with full permissions',
                 'permissions' => [

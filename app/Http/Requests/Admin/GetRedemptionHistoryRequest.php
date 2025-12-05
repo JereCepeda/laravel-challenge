@@ -7,7 +7,8 @@ class GetRedemptionHistoryRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user() && $this->user()->hasRole('admin'); 
+        // El middleware 'admin:admin' ya validó el rol
+        return true;
     }
 
     public function rules(): array
