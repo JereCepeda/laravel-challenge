@@ -1,4 +1,3 @@
-{{-- filepath: f:\xampp\htdocs\laravel-challenge\resources\views\layouts\app.blade.php --}}
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
@@ -9,39 +8,28 @@
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <!-- Custom CSS -->
-    <style>
-        .sidebar {
-            min-height: 100vh;
-            background-color: #f8f9fa;
-            border-right: 1px solid #dee2e6;
-        }
-        .nav-link.active {
-            background-color: #0d6efd;
-            color: white !important;
-            border-radius: 0.375rem;
-        }
-        .main-content {
-            background-color: #ffffff;
-        }
-    </style>
+    <link href="{{ asset('css/sidebar.css') }}" rel="stylesheet">
 </head>
 <body>
-    <div class="container-fluid">
-        <div class="row">
+    <!-- Toggle Button -->
+    <button class="sidebar-toggle" id="sidebarToggle">
+        <i class="bi bi-list"></i>
+    </button>
+    
+    <!-- Overlay for mobile -->
+    <div class="overlay" id="overlay"></div>
+    
+    <div class="container-fluid p-0">
+        <div class="row g-0">
             <!-- Sidebar -->
-            <nav class="col-md-3 col-lg-2 sidebar px-0">
+            <nav class="sidebar" id="sidebar">
                 @include('layouts.sidebar', ['user' => $user])
             </nav>
-
+            
             <!-- Main Content -->
-            <main class="col-md-9 col-lg-10 main-content">
-                <!-- Top Navigation -->
-                @include('layouts.navigation', ['user' => $user])
-
+            <main class="main-content" id="mainContent">
                 <!-- Content Area -->
                 <div class="container-fluid py-4">
                     @if (session('status'))
@@ -50,15 +38,17 @@
                             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
                     @endif
-
                     @if (session('error'))
                         <div class="alert alert-danger alert-dismissible fade show">
                             {{ session('error') }}
                             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
                     @endif
-
-                    @yield('content')
+                    
+                    <!-- SPA Content Container -->
+                    <div id="spa-content">
+                        @include('dashboard.home')
+                    </div>
                 </div>
             </main>
         </div>
@@ -66,5 +56,17 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="{{ asset('js/sidebar.js') }}"></script>
+    <script src="{{ asset('js/spa.js') }}"></script>
+    
+    <!-- User data for JavaScript -->
+    <script>
+        window.App = {
+            user: @json($user),
+            csrfToken: '{{ csrf_token() }}',
+            apiUrl: '{{ url('/api') }}'
+        };
+    </script>
 </body>
 </html>
