@@ -49,7 +49,8 @@
             role: '{{ $role }}',
             permissions: @json($permissions),
             csrfToken: '{{ csrf_token() }}',
-            apiUrl: '{{ url('/api/dashboard') }}'
+            apiUrl: '{{ url('/api/dashboard') }}',
+            baseUrl: '{{ url('/') }}'
         };
     </script>
     <script src="{{ asset('js/dashboard.js') }}"></script>

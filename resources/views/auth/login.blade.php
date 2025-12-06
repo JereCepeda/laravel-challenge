@@ -7,7 +7,7 @@
     <div class="row justify-content-center mt-5">
         <div class="col-md-5">
             <div class="card shadow">
-                <div class="card-header bg-primary text-white">
+                <div class="card-header bg-dark text-white">
                     <h4 class="mb-0">Login</h4>
                 </div>
                 <div class="card-body">
@@ -38,7 +38,7 @@
                             @enderror
                         </div>
 
-                        <button type="submit" class="btn btn-primary w-100">Login</button>
+                        <button type="submit" class="btn btn-dark w-100">Login</button>
                     </form>
                 </div>
             </div>

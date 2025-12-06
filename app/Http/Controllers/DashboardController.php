@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class DashboardController extends Controller
 {
@@ -42,6 +43,7 @@ class DashboardController extends Controller
         $allowedSections = $this->getAllowedSections($role, $permissions);
         
         if (!in_array($section, $allowedSections)) {
+            Log::info("Acceso denegado a la sección '{$section}' para el usuario ID {$user->id} con rol '{$role}'");
             return response()->json([
                 'error' => 'No tienes permisos para acceder a esta sección'
             ], 403);

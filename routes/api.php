@@ -25,17 +25,4 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/tickets/used/{event_name}', [AdminController::class, 'getUsedTickets']);
         Route::get('/redemption/history', [AdminController::class, 'getRedemptionHistory']);
     });
-    
-    // Dashboard APIs - Nuevas rutas para las vistas del dashboard (solo admin)
-    Route::prefix('dashboard/admin')->middleware('admin:admin')->group(function () {
-        Route::get('/statistics', [AdminApiController::class, 'getStatistics']);
-        Route::get('/tickets/used', [AdminApiController::class, 'getUsedTickets']);
-        Route::get('/redemptions/history', [AdminApiController::class, 'getRedemptionsHistory']);
-        Route::get('/reports', [AdminApiController::class, 'getReports']);
-    });
-    
-    // Checker Dashboard APIs (admin o checker)
-    Route::prefix('dashboard/checker')->middleware('admin:admin,checker')->group(function () {
-        Route::get('/events', [CheckerApiController::class, 'getActiveEvents']);
-    });
 });

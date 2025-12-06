@@ -24,7 +24,7 @@
     <div class="container-fluid p-0">
         <div class="row g-0">
             <!-- Sidebar -->
-            <nav class="sidebar" id="sidebar">
+            <nav class="sidebar d-flex flex-column flex-shrink-0 p-2 text-white bg-dark" id="sidebar">
                 @include('layouts.sidebar', ['user' => $user])
             </nav>
             

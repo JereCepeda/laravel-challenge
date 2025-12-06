@@ -146,10 +146,8 @@ class AuthController extends Controller
                 'user_id' => $request->user()->id,
                 'email' => $request->user()->email
             ]);
-
-            return response()->json([
-                'message' => 'Logout successful'
-            ], Response::HTTP_OK);
+            Auth::logout();
+            return view('auth.login')->with('success', 'Logged out successfully');
 
         } catch (\Exception $e) {
             Log::error('Error en logout', [

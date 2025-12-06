@@ -5,8 +5,6 @@ namespace App\Services\Ticket;
 use App\Models\Ticket;
 use App\Models\InvitationRedemption;
 use Illuminate\Support\Str;
-use App\Jobs\SendTicketNotificationJob;
-use App\Events\InvitationRedeemed;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Exceptions\InvitationException;

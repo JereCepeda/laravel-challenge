@@ -5,31 +5,30 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Services\Admin\AdminReportService;
+use App\Services\Admin\MetricsService;
 use App\Http\Requests\Admin\GetUsedTicketsRequest;
 use App\Http\Requests\Admin\GetRedemptionHistoryRequest;
 
 class AdminApiController extends Controller
 {
     public function __construct(
-        private AdminReportService $adminReportService
+        private AdminReportService $adminReportService,
+        private MetricsService $metricsService
     ) {}
     
     /**
-     * Estadísticas generales del dashboard
+     * Estadísticas principales del dashboard (KPIs)
      */
     public function getStatistics(Request $request)
     {
-        $stats = [
-            'total_tickets_validated' => \App\Models\Ticket::where('is_validated', true)->count(),
-            'total_invitations_redeemed' => \App\Models\InvitationRedemption::count(),
-            'active_events' => \App\Models\Ticket::distinct('event_name')->count('event_name'),
-            'recent_validations' => \App\Models\Ticket::where('is_validated', true)
-                ->latest('validated_at')
-                ->take(5)
-                ->get(['ticket_code', 'event_name', 'validated_at'])
-        ];
+        $mainKpis = $this->metricsService->getMainKpis();
+        $additionalMetrics = $this->metricsService->getAdditionalMetrics();
         
-        return response()->json($stats);
+        return response()->json([
+            'main_kpis' => $mainKpis,
+            'additional_metrics' => $additionalMetrics,
+            'last_updated' => now()->toISOString()
+        ]);
     }
     
     /**
