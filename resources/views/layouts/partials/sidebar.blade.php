@@ -1,25 +1,11 @@
 <div class=" d-flex flex-column flex-shrink-0 p-3 text-white bg-dark">
     <div class="sidebar-header">
             <i class="bi bi-people"></i>
-            <h5>{{ $user->name }}</h5>
-            <span class="badge">{{ $user->role->name }}</span>
+            <h6>{{ $user->name }}</h6>
         </div>
 
-        <!-- Navegación dinámica según rol-->
-        {{--<div class="sidebar-nav">
-            @if($user->role->slug === 'admin')
-                @include('layouts.sidebar.admin-menu')
-            @elseif($user->role->slug === 'checker')
-                @include('layouts.sidebar.checker-menu')
-            @elseif($user->role->slug === 'seller')
-                @include('layouts.sidebar.seller-menu')
-            @else
-                @include('layouts.sidebar.user-menu')
-            @endif
-        </div>  --}}
-
         <div class="sidebar-brand">
-            <h4><i class="bi bi-ticket-perforated-fill me-2"></i>Ticket Manager</h4>
+            <h4><i class="bi bi-ticket-perforated-fill me-1"></i>Ticket Manager</h4>
         </div>
 
         <div class="user-profile">
@@ -89,14 +75,10 @@
                 @endif
             </nav>
         </div>
-        <ur>
-        <div class="sidebar-footer mt-auto p-3 bg-dark">
-            <form action="{{ route('logout') }}" method="POST">
-                @csrf
-                <button type="submit" class="btn btn-logout">
-                    <i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión
-                </button>
-            </form>
+        <div class="mt-auto p-3 bg-dark">
+            <button type="button" class="btn btn-logout" data-action="logout">
+                <i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión
+            </button>
         </div>
     </div>
 </div>

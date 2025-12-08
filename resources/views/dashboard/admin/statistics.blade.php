@@ -102,67 +102,76 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+(function() {
+    // Ejecutar inmediatamente al cargar la vista
     loadMetrics();
     
-    document.getElementById('refreshMetrics')?.addEventListener('click', function() {
-        this.innerHTML = '<i class="bi bi-arrow-clockwise spin"></i> Actualizando...';
-        loadMetrics();
-    });
-});
-
-async function loadMetrics() {
-    try {
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || window.App?.csrfToken;
-        const baseUrl = window.App?.baseUrl || '';
-        
-        const response = await fetch(`${baseUrl}/dashboard/api/admin/statistics`, {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': csrfToken
-            },
-            credentials: 'same-origin'
-        });
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        updateMetricsUI(data);
-        
-    } catch (error) {
-        console.error('Error al cargar métricas:', error);
-        document.getElementById('lastUpdated').textContent = 'Error al cargar datos';
-    }
-}
-
-function updateMetricsUI(data) {
-    const { main_kpis, additional_metrics, last_updated } = data;
-    
-    // KPIs Principales
-    document.getElementById('totalValidated').textContent = main_kpis.total_tickets_validated.toLocaleString();
-    document.getElementById('totalInvitations').textContent = main_kpis.total_invitations_redeemed.toLocaleString();
-    document.getElementById('activeEvents').textContent = main_kpis.active_events.toLocaleString();
-    document.getElementById('conversionRate').textContent = main_kpis.conversion_rate + '%';
-    
-    // Métricas Adicionales
-    document.getElementById('pendingTickets').textContent = additional_metrics.pending_tickets.toLocaleString();
-    document.getElementById('eventsWithValidations').textContent = additional_metrics.events_with_validations.toLocaleString();
-    document.getElementById('avgTickets').textContent = additional_metrics.avg_tickets_per_invitation;
-    document.getElementById('popularSector').textContent = additional_metrics.most_popular_sector || 'N/A';
-    
-    // Última actualización
-    const lastUpdatedDate = new Date(last_updated);
-    document.getElementById('lastUpdated').textContent = lastUpdatedDate.toLocaleString('es-ES');
-    
-    // Restaurar botón de refresh
+    // Configurar el botón de refresh
     const refreshBtn = document.getElementById('refreshMetrics');
     if (refreshBtn) {
-        refreshBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Actualizar';
+        refreshBtn.addEventListener('click', function() {
+            this.innerHTML = '<i class="bi bi-arrow-clockwise spin"></i> Actualizando...';
+            loadMetrics();
+        });
     }
-}
+
+    async function loadMetrics() {
+        try {
+            const token = localStorage.getItem('auth_token');
+            
+            const response = await fetch('{{ url("/api/admin/statistics") }}', {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            
+            if (response.status === 401) {
+                localStorage.removeItem('auth_token');
+                window.location.href = '/login';
+                return;
+            }
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            updateMetricsUI(data);
+            
+        } catch (error) {
+            console.error('Error al cargar métricas:', error);
+            document.getElementById('lastUpdated').textContent = 'Error al cargar datos';
+        }
+    }
+
+    function updateMetricsUI(data) {
+        const { main_kpis, additional_metrics, last_updated } = data;
+        
+        // KPIs Principales
+        document.getElementById('totalValidated').textContent = main_kpis.total_tickets_validated.toLocaleString();
+        document.getElementById('totalInvitations').textContent = main_kpis.total_invitations_redeemed.toLocaleString();
+        document.getElementById('activeEvents').textContent = main_kpis.active_events.toLocaleString();
+        document.getElementById('conversionRate').textContent = main_kpis.conversion_rate + '%';
+        
+        // Métricas Adicionales
+        document.getElementById('pendingTickets').textContent = additional_metrics.pending_tickets.toLocaleString();
+        document.getElementById('eventsWithValidations').textContent = additional_metrics.events_with_validations.toLocaleString();
+        document.getElementById('avgTickets').textContent = additional_metrics.avg_tickets_per_invitation;
+        document.getElementById('popularSector').textContent = additional_metrics.most_popular_sector || 'N/A';
+        
+        // Última actualización
+        const lastUpdatedDate = new Date(last_updated);
+        document.getElementById('lastUpdated').textContent = lastUpdatedDate.toLocaleString('es-ES');
+        
+        // Restaurar botón de refresh
+        const refreshBtn = document.getElementById('refreshMetrics');
+        if (refreshBtn) {
+            refreshBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Actualizar';
+        }
+    }
+})();
 </script>

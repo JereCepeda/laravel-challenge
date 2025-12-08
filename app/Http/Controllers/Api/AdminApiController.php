@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Services\Admin\AdminReportService;
+use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
 use App\Services\Admin\MetricsService;
+use App\Services\Admin\AdminReportService;
 use App\Http\Requests\Admin\GetUsedTicketsRequest;
 use App\Http\Requests\Admin\GetRedemptionHistoryRequest;
 
@@ -16,9 +17,6 @@ class AdminApiController extends Controller
         private MetricsService $metricsService
     ) {}
     
-    /**
-     * Estadísticas principales del dashboard (KPIs)
-     */
     public function getStatistics(Request $request)
     {
         $mainKpis = $this->metricsService->getMainKpis();
@@ -31,12 +29,15 @@ class AdminApiController extends Controller
         ]);
     }
     
-    /**
-     * Tickets usados con filtros y paginación - usando GetUsedTicketsRequest
-     */
+
     public function getUsedTickets(GetUsedTicketsRequest $request)
     {
         $validated = $request->validated();
+        info('Get Used Tickets Request', $validated);
+        if ($request->has('draw')) {
+            return $this->getUsedTicketsDataTable($request);
+        }
+        
         $perPage = $validated['per_page'] ?? 15;
         
         // Usar el AdminReportService para obtener tickets
@@ -68,6 +69,58 @@ class AdminApiController extends Controller
                 'per_page' => $tickets->perPage(),
                 'total' => $tickets->total()
             ]
+        ]);
+    }
+    
+    /**
+     * Tickets usados para DataTables Server-Side Processing
+     */
+    private function getUsedTicketsDataTable(Request $request)
+    {
+        $draw = $request->input('draw');
+        $start = $request->input('start', 0);
+        $length = $request->input('length', 15);
+        $currentPage = ($start / $length) + 1;
+        
+        // Establecer la página actual para el paginador de Laravel
+        \Illuminate\Pagination\Paginator::currentPageResolver(function () use ($currentPage) {
+            return $currentPage;
+        });
+        
+        $filters = [
+            'event_name' => $request->input('event_name'),
+            'sector' => $request->input('sector'),
+            'event_date' => $request->input('event_date'),
+        ];
+        
+        // Usar el AdminReportService para obtener tickets
+        $tickets = $this->adminReportService->getUsedTicketsForEvent(
+            eventName: $filters['event_name'] ?? '',
+            filters: array_filter($filters),
+            perPage: $length
+        );
+        
+        // Transformar datos para DataTables
+        $transformedData = collect($tickets->items())->map(function ($ticket) {
+            return [
+                'qr_code' => $ticket->ticket_code,
+                'event_name' => $ticket->event_name,
+                'event_date' => $ticket->event_date,
+                'sector' => $ticket->sector,
+                'user' => [
+                    'name' => $ticket->validator?->name ?? 'N/A',
+                    'email' => $ticket->validator?->email ?? ''
+                ],
+                'validated_at' => $ticket->validated_at?->toISOString()
+            ];
+        })->values()->all();
+        
+        Log::info('Used Tickets DataTable', ['filters' => $filters, 'draw' => $draw, 'start' => $start, 'length' => $length]);
+        return response()->json([
+            'draw' => intval($draw),
+            'recordsTotal' => $tickets->total(),
+            'recordsFiltered' => $tickets->total(),
+            'data' => $transformedData
         ]);
     }
     

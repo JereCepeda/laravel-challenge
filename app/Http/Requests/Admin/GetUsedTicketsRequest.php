@@ -14,11 +14,33 @@ class GetUsedTicketsRequest extends FormRequest
     public function rules(): array
     {
         return [
+            // Filtros de negocio
             'event_name' => 'nullable|string|max:255',
             'sector' => 'sometimes|string|max:50',
+            'event_date' => 'nullable|date',
             'from_date' => 'sometimes|date|before_or_equal:today',
             'to_date' => 'sometimes|date|after_or_equal:from_date',
-            'per_page' => 'sometimes|integer|min:5|max:100'
+            'per_page' => 'sometimes|integer|min:5|max:100',
+            
+            // Parámetros de DataTables Server-Side Processing
+            'draw' => 'sometimes|integer',
+            'start' => 'sometimes|integer|min:0',
+            'length' => 'sometimes|integer|min:1|max:100',
+            'search' => 'sometimes|array',
+            'search.value' => 'nullable|string',
+            'search.regex' => 'nullable|boolean',
+            'order' => 'sometimes|array',
+            'order.*.column' => 'sometimes|integer',
+            'order.*.dir' => 'sometimes|in:asc,desc',
+            'columns' => 'sometimes|array',
+            'columns.*.data' => 'nullable|string',
+            'columns.*.name' => 'nullable|string',
+            'columns.*.searchable' => 'nullable|boolean',
+            'columns.*.orderable' => 'nullable|boolean',
+            'columns.*.search' => 'sometimes|array',
+            'columns.*.search.value' => 'nullable|string',
+            'columns.*.search.regex' => 'nullable|boolean',
+            '_' => 'sometimes|integer' // Timestamp cache buster
         ];
     }
     

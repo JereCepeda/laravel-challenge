@@ -1,5 +1,5 @@
 /**
- * Dashboard SPA - Sistema de navegación sin recargar página
+ * Dashboard SPA
  */
 class DashboardSPA {
     constructor() {
@@ -13,13 +13,15 @@ class DashboardSPA {
     }
     
     init() {
-        // Inicializar navegación SPA
         this.initSPALinks();
-        
-        // Inicializar menú móvil
         this.initMobileMenu();
+        this.initLogout();
         
-        // Manejar botón atrás del navegador
+        // Ejecutar scripts de la vista inicial
+        if (this.contentContainer) {
+            this.executeScripts(this.contentContainer);
+        }
+        
         window.addEventListener('popstate', (e) => {
             if (e.state && e.state.section) {
                 this.loadSection(e.state.section, false);
@@ -27,9 +29,35 @@ class DashboardSPA {
         });
     }
     
-    /**
-     * Inicializar links de navegación SPA
-     */
+    initLogout() {
+        document.querySelectorAll('[data-action="logout"]').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                await this.logout();
+            });
+        });
+    }
+    
+    async logout() {
+        const token = localStorage.getItem('auth_token');
+        
+        try {
+            await fetch(`${window.App.baseUrl}/api/logout`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'X-CSRF-TOKEN': window.App.csrfToken
+                }
+            });
+        } catch (error) {
+            console.error('Error logout:', error);
+        } finally {
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('user');
+            window.location.href = `${window.App.baseUrl}/login`;
+        }
+    }
+    
     initSPALinks() {
         document.querySelectorAll('.spa-link').forEach(link => {
             link.addEventListener('click', (e) => {
@@ -38,63 +66,54 @@ class DashboardSPA {
                 const section = link.dataset.section;
                 const title = link.dataset.title;
                 
-                // Actualizar link activo
                 this.setActiveLink(link);
                 
-                // Actualizar título
                 if (title) {
                     this.pageTitle.textContent = title;
                 }
                 
-                // Cargar sección
                 this.loadSection(section, true);
-                
-                // Cerrar menú móvil si está abierto
                 this.closeMobileMenu();
             });
         });
     }
     
-    /**
-     * Cargar sección del dashboard
-     */
     async loadSection(section, updateHistory = true) {
-        // Mostrar loading
         this.showLoading();
         
         try {
-            const response = await fetch(`/dashboard/${section}`, {
+            const token = localStorage.getItem('auth_token');
+            
+            const response = await fetch(`${window.App.baseUrl}/api/dashboard/${section}`, {
                 headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': window.App.csrfToken
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'text/html'
                 }
             });
             
+            if (response.status === 401) {
+                localStorage.removeItem('auth_token');
+                localStorage.removeItem('user');
+                window.location.href = `${window.App.baseUrl}/login`;
+                return;
+            }
+            
             if (!response.ok) {
-                if (response.status === 403) {
-                    throw new Error('No tienes permisos para acceder a esta sección');
-                }
-                throw new Error('Error al cargar la sección');
+                throw new Error(response.status === 403 ? 
+                    'No tienes permisos' : 
+                    'Error al cargar sección');
             }
             
             const html = await response.text();
             
-            // Insertar contenido
             this.contentContainer.innerHTML = html;
+            this.executeScripts(this.contentContainer);
             
-            // Actualizar historial del navegador
             if (updateHistory) {
-                history.pushState(
-                    { section }, 
-                    '', 
-                    `/dashboard#${section}`
-                );
+                history.pushState({ section }, '', `${window.App.baseUrl}/dashboard#${section}`);
             }
             
-            // Inicializar componentes de Bootstrap en la nueva vista
             this.initializeBootstrapComponents();
-            
-            // Scroll al inicio
             window.scrollTo({ top: 0, behavior: 'smooth' });
             
         } catch (error) {
@@ -103,34 +122,23 @@ class DashboardSPA {
         }
     }
     
-    /**
-     * Mostrar loading spinner
-     */
     showLoading() {
         this.contentContainer.innerHTML = `
-            <div class="loading-spinner">
-                <div class="spinner-border spinner-border-custom text-primary" role="status">
-                    <span class="visually-hidden">Cargando...</span>
-                </div>
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary"></div>
+                <p class="mt-2">Cargando...</p>
             </div>
         `;
     }
     
-    /**
-     * Mostrar mensaje de error
-     */
     showError(message) {
         this.contentContainer.innerHTML = `
-            <div class="alert alert-danger" role="alert">
-                <i class="bi bi-exclamation-triangle me-2"></i>
-                ${message}
+            <div class="alert alert-danger">
+                <i class="bi bi-exclamation-triangle"></i> ${message}
             </div>
         `;
     }
     
-    /**
-     * Marcar link como activo
-     */
     setActiveLink(activeLink) {
         document.querySelectorAll('.spa-link').forEach(link => {
             link.classList.remove('active');
@@ -138,22 +146,24 @@ class DashboardSPA {
         activeLink.classList.add('active');
     }
     
-    /**
-     * Inicializar componentes de Bootstrap
-     */
-    initializeBootstrapComponents() {
-        // Inicializar tooltips
-        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-        [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
-        
-        // Inicializar popovers
-        const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
-        [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
+    executeScripts(container) {
+        container.querySelectorAll('script').forEach(oldScript => {
+            const newScript = document.createElement('script');
+            Array.from(oldScript.attributes).forEach(attr => {
+                newScript.setAttribute(attr.name, attr.value);
+            });
+            newScript.textContent = oldScript.textContent;
+            oldScript.parentNode.replaceChild(newScript, oldScript);
+        });
     }
     
-    /**
-     * Inicializar menú móvil
-     */
+    initializeBootstrapComponents() {
+        document.querySelectorAll('[data-bs-toggle="tooltip"]')
+            .forEach(el => new bootstrap.Tooltip(el));
+        document.querySelectorAll('[data-bs-toggle="popover"]')
+            .forEach(el => new bootstrap.Popover(el));
+    }
+    
     initMobileMenu() {
         if (this.mobileMenuToggle) {
             this.mobileMenuToggle.addEventListener('click', () => {
@@ -168,24 +178,27 @@ class DashboardSPA {
         }
     }
     
-    /**
-     * Toggle menú móvil
-     */
     toggleMobileMenu() {
         this.sidebar.classList.toggle('active');
         this.sidebarOverlay.classList.toggle('active');
     }
     
-    /**
-     * Cerrar menú móvil
-     */
     closeMobileMenu() {
         this.sidebar.classList.remove('active');
         this.sidebarOverlay.classList.remove('active');
     }
 }
 
-// Inicializar SPA cuando el DOM esté listo
-document.addEventListener('DOMContentLoaded', () => {
-    window.dashboardSPA = new DashboardSPA();
-});
+// Solo auto-inicializar si el DOM ya está cargado y no se carga dinámicamente
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        if (!window.dashboardSPA) {
+            window.dashboardSPA = new DashboardSPA();
+        }
+    });
+} else {
+    // DOM ya está listo (carga estática desde dashboard.blade.php)
+    if (!window.dashboardSPA && document.getElementById('spa-content')) {
+        window.dashboardSPA = new DashboardSPA();
+    }
+}

@@ -27,7 +27,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
         
         // Configure auth redirect
-        $middleware->redirectGuestsTo(fn () => route('auth.login'));
+        $middleware->redirectGuestsTo(fn () => url('/login'));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

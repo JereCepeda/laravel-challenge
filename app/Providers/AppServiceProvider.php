@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Http\Middleware\Authenticate;
 use App\Services\AuthService;
 use App\Services\UserValidationService;
 use Illuminate\Support\ServiceProvider;
@@ -14,6 +15,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(AuthService::class);
+        $this->app->singleton(Authenticate::class);
         $this->app->singleton(UserValidationService::class);
     }
 

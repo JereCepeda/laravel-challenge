@@ -58,7 +58,12 @@ class DashboardController extends Controller
             ], 404);
         }
         
-        return view($viewPath, compact('user', 'permissions'));
+        // Preparar datos adicionales según la sección
+        $data = $this->getDataForSection($section);
+        $data['user'] = $user;
+        $data['permissions'] = $permissions;
+        
+        return view($viewPath, $data);
     }
     
     /**
@@ -81,5 +86,28 @@ class DashboardController extends Controller
         ];
         
         return $sections[$role] ?? [];
+    }
+    
+    /**
+     * Obtener datos adicionales específicos para cada sección
+     */
+    private function getDataForSection(string $section): array
+    {
+        return match($section) {
+            'used-tickets' => [
+                'events' => \App\Models\Ticket::select('event_name', 'event_date', 'sector')
+                    ->distinct()
+                    ->groupBy('event_name', 'event_date', 'sector')
+                    ->orderBy('event_date', 'desc')
+                    ->get()
+            ],
+            'redemptions-history' => [
+                'events' => \App\Models\Ticket::select('event_name')
+                    ->distinct()
+                    ->orderBy('event_name')
+                    ->get()
+            ],
+            default => []
+        };
     }
 }

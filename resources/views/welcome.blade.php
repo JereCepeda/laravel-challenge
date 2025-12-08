@@ -13,7 +13,7 @@
             <span class="navbar-brand">Laravel Challenge</span>
         </div>
         <div>
-            <a href="{{ route('auth.login') }}" class="btn btn-outline-light">Login</a>
+            <a href="/login" class="btn btn-outline-light">Login</a>
         </div>
     </nav>
     @if (session('error'))
