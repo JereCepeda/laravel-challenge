@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Ticket;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -93,11 +94,24 @@ class DashboardController extends Controller
      */
     private function getDataForSection(string $section): array
     {
+        info('Filtros para sección: ' . json_encode(\App\Models\Ticket::select('event_name', 'event_date')
+                    ->distinct()
+                    ->groupBy('event_name', 'event_date')
+                    ->orderBy('event_name')
+                    ->orderBy('event_date', 'desc')
+                    ->get()));
+                    
         return match($section) {
             'used-tickets' => [
                 'events' => \App\Models\Ticket::select('event_name', 'event_date', 'sector')
                     ->distinct()
                     ->groupBy('event_name', 'event_date', 'sector')
+                    ->orderBy('event_date', 'desc')
+                    ->get(),
+                'filters' => \App\Models\Ticket::select('event_name', 'event_date')
+                    ->distinct()
+                    ->groupBy('event_name')
+                    ->orderBy('event_name')
                     ->orderBy('event_date', 'desc')
                     ->get()
             ],

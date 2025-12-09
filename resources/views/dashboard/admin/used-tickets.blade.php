@@ -15,9 +15,9 @@
                     <label class="form-label">Evento</label>
                     <select class="form-select" id="filterEventName">
                         <option value="">Todos los eventos</option>
-                        @foreach($events as $event)
+                        @foreach($filters as $event)
                             <option value="{{ $event->event_name }}">
-                                {{ $event->event_name }} - {{ \Carbon\Carbon::parse($event->event_date)->format('d/m/Y') }}
+                                {{ $event->event_name }}
                             </option>
                         @endforeach
                     </select>
@@ -50,8 +50,6 @@
                             <th>Evento</th>
                             <th>Fecha</th>
                             <th>Sector</th>
-                            <th>Usuario</th>
-                            <th>Validado en</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -101,34 +99,33 @@
             },
             columns: [
                 { 
-                    data: 'qr_code',
+                    data: 'ticket_code',
                     render: function(data) {
                         return `<code>${data}</code>`;
                     }
                 },
-                { data: 'event_name' },
+                { data: 'event_name' ,
+                    render: function(data) {
+                        return `<strong>${data}</strong>`;
+                    }
+                },
                 { 
                     data: 'event_date',
                     render: function(data) {
-                        return new Date(data).toLocaleDateString('es-ES');
+                        // Ahora data es '2026-01-26', sin hora
+                        const [year, month, day] = data.split('-');
+                        const date = new Date(year, month - 1, day);
+                        return date.toLocaleDateString('es-ES', { 
+                            year: 'numeric', 
+                            month: '2-digit', 
+                            day: '2-digit' 
+                        });
                     }
                 },
                 { 
                     data: 'sector',
                     render: function(data) {
                         return `<span class="badge bg-info">${data}</span>`;
-                    }
-                },
-                { 
-                    data: 'user',
-                    render: function(data) {
-                        return data?.name || 'N/A';
-                    }
-                },
-                { 
-                    data: 'validated_at',
-                    render: function(data) {
-                        return data ? new Date(data).toLocaleString('es-ES') : '<span class="badge bg-warning">Pendiente</span>';
                     }
                 }
             ],
@@ -158,7 +155,7 @@
             },
             pageLength: 15,
             lengthMenu: [[10, 15, 25, 50, 100], [10, 15, 25, 50, 100]],
-            order: [[5, 'desc']], // Ordenar por fecha de validación
+            order: [[1, 'desc']],
             responsive: true
         });
     }

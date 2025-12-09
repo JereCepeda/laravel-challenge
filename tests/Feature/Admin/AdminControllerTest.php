@@ -49,7 +49,7 @@ class AdminControllerTest extends TestCase
 
         Passport::actingAs($this->adminUser, [], 'api');
         
-        $response = $this->getJson('/api/admin/redemption/history');
+        $response = $this->getJson('/api/admin/redemptions/history');
                 
         $response->assertStatus(200)
                 ->assertJsonStructure([
@@ -106,7 +106,7 @@ class AdminControllerTest extends TestCase
     {
         Passport::actingAs($this->checkerUser, [], 'api');
 
-        $response = $this->getJson('/api/admin/redemption/history');
+        $response = $this->getJson('/api/admin/redemptions/history');
         $response->assertStatus(403);
 
         $response = $this->getJson('/api/admin/tickets/used/Test%20Event');
@@ -115,7 +115,7 @@ class AdminControllerTest extends TestCase
 
     public function test_unauthenticated_user_cannot_access_admin_routes()
     {
-        $response = $this->getJson('/api/admin/redemption/history');
+        $response = $this->getJson('/api/admin/redemptions/history');
         $response->assertStatus(401);
 
         $response = $this->getJson('/api/admin/tickets/used/Test%20Event');

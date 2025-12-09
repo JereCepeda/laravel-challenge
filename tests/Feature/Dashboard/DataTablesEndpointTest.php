@@ -44,7 +44,8 @@ beforeEach(function () {
         'event_date' => '2025-12-20',
         'sector' => 'VIP',
         'is_validated' => true,
-        'validated_at' => now()
+        'validated_at' => now(),
+        'validated_by' => $this->adminUser->id
     ]);
 });
 
@@ -69,7 +70,7 @@ test('DataTables endpoint accepts draw parameter', function () {
      */
     Passport::actingAs($this->adminUser);
 
-    $response = $this->getJson('/api/admin/tickets/used?draw=1', [
+    $response = $this->getJson('/api/admin/tickets/used?draw=1&start=0&length=15', [
         'Accept' => 'application/json'
     ]);
 
@@ -123,11 +124,10 @@ test('DataTables endpoint returns tickets with correct fields', function () {
     if (count($data['data']) > 0) {
         $ticket = $data['data'][0];
         expect($ticket)->toHaveKeys([
-            'qr_code',
+            'ticket_code',
             'event_name',
             'event_date',
-            'sector',
-            'validated_at'
+            'sector'
         ]);
     }
 });
@@ -144,19 +144,41 @@ test('DataTables endpoint accepts all required parameters', function () {
         'start' => 0,
         'length' => 15,
         'columns' => [
-            ['data' => 'qr_code', 'searchable' => true, 'orderable' => true],
-            ['data' => 'event_name', 'searchable' => true, 'orderable' => true],
-            ['data' => 'event_date', 'searchable' => true, 'orderable' => true],
-            ['data' => 'sector', 'searchable' => true, 'orderable' => true],
-            ['data' => 'user', 'searchable' => true, 'orderable' => true],
-            ['data' => 'validated_at', 'searchable' => true, 'orderable' => true],
+            [
+                'data' => 'ticket_code',
+                'name' => null,
+                'searchable' => 'true',
+                'orderable' => 'true',
+                'search' => ['value' => null, 'regex' => 'false']
+            ],
+            [
+                'data' => 'event_name',
+                'name' => null,
+                'searchable' => 'true',
+                'orderable' => 'true',
+                'search' => ['value' => null, 'regex' => 'false']
+            ],
+            [
+                'data' => 'event_date',
+                'name' => null,
+                'searchable' => 'true',
+                'orderable' => 'true',
+                'search' => ['value' => null, 'regex' => 'false']
+            ],
+            [
+                'data' => 'sector',
+                'name' => null,
+                'searchable' => 'true',
+                'orderable' => 'true',
+                'search' => ['value' => null, 'regex' => 'false']
+            ]
         ],
         'order' => [
-            ['column' => 5, 'dir' => 'desc']
+            ['column' => 1, 'dir' => 'desc']
         ],
         'search' => [
-            'value' => '',
-            'regex' => false
+            'value' => null,
+            'regex' => 'false'
         ]
     ];
 
@@ -237,7 +259,8 @@ test('DataTables endpoint filters by event name', function () {
         'event_date' => '2025-12-25',
         'sector' => 'Platea',
         'is_validated' => true,
-        'validated_at' => now()
+        'validated_at' => now(),
+        'validated_by' => $this->adminUser->id
     ]);
 
     Passport::actingAs($this->adminUser);
@@ -268,7 +291,8 @@ test('DataTables endpoint filters by sector', function () {
         'event_date' => '2025-12-20',
         'sector' => 'Platea',
         'is_validated' => true,
-        'validated_at' => now()
+        'validated_at' => now(),
+        'validated_by' => $this->adminUser->id
     ]);
 
     Passport::actingAs($this->adminUser);
@@ -416,8 +440,8 @@ test('DataTables endpoint returns data in correct format for frontend rendering'
     if (count($data['data']) > 0) {
         $ticket = $data['data'][0];
         
-        // QR Code debe ser string
-        expect($ticket['qr_code'])->toBeString();
+        // Ticket code debe ser string
+        expect($ticket['ticket_code'])->toBeString();
         
         // Event name debe ser string
         expect($ticket['event_name'])->toBeString();
@@ -428,9 +452,13 @@ test('DataTables endpoint returns data in correct format for frontend rendering'
         // Sector debe ser string
         expect($ticket['sector'])->toBeString();
         
-        // Validated_at puede ser null o string
-        $validatedAt = $ticket['validated_at'];
-        expect($validatedAt === null || is_string($validatedAt))->toBeTrue();
+        // Verificar que tiene exactamente los campos esperados
+        expect($ticket)->toHaveKeys([
+            'ticket_code',
+            'event_name',
+            'event_date',
+            'sector'
+        ]);
     }
 });
 

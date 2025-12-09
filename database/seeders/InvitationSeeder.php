@@ -42,7 +42,7 @@ class InvitationSeeder extends Seeder
             [
                 'invitation_id' => 'INV-' . strtoupper(Str::random(8)),
                 'event_name' => 'Electronic Music Party',
-                'event_date' => now()->addDays(3),
+                'event_date' => now()->addDays(8),
                 'sector' => 'General',
                 'guest_count' => 2,
             ],
@@ -54,7 +54,7 @@ class InvitationSeeder extends Seeder
                 'guest_count' => 1,
             ],
             
-            // Eventos futuros
+            // Eventos futuros - Primera función de Classical Concert
             [
                 'invitation_id' => 'INV-' . strtoupper(Str::random(8)),
                 'event_name' => 'Classical Concert',
@@ -62,13 +62,15 @@ class InvitationSeeder extends Seeder
                 'sector' => 'Platea',
                 'guest_count' => 4,
             ],
+            // Segunda función de Classical Concert (2 días después)
             [
                 'invitation_id' => 'INV-' . strtoupper(Str::random(8)),
                 'event_name' => 'Classical Concert',
-                'event_date' => now()->addDays(20),
+                'event_date' => now()->addDays(22),
                 'sector' => 'Palco',
                 'guest_count' => 2,
             ],
+            // Primera función de Metal Festival
             [
                 'invitation_id' => 'INV-' . strtoupper(Str::random(8)),
                 'event_name' => 'Metal Festival',
@@ -76,10 +78,11 @@ class InvitationSeeder extends Seeder
                 'sector' => 'VIP',
                 'guest_count' => 1,
             ],
+            // Segunda función de Metal Festival (3 días después)
             [
                 'invitation_id' => 'INV-' . strtoupper(Str::random(8)),
                 'event_name' => 'Metal Festival',
-                'event_date' => now()->addDays(45),
+                'event_date' => now()->addDays(48),
                 'sector' => 'General',
                 'guest_count' => 3,
             ],

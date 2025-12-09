@@ -22,6 +22,10 @@ class AdminReportService
             $query->where('sector', $filters['sector']);
         }
 
+        if (!empty($filters['event_date'])) {
+            $query->whereDate('event_date', $filters['event_date']);
+        }
+
         if (!empty($filters['from_date'])) {
             $query->whereDate('validated_at', '>=', $filters['from_date']);
         }

@@ -8,7 +8,10 @@ use App\Http\Controllers\Controller;
 use App\Services\Admin\MetricsService;
 use App\Services\Admin\AdminReportService;
 use App\Http\Requests\Admin\GetUsedTicketsRequest;
+use App\Http\Requests\Admin\GetUsedTicketsDataTableRequest;
 use App\Http\Requests\Admin\GetRedemptionHistoryRequest;
+use App\Http\Resources\Admin\UsedTicketResource;
+use App\Http\Resources\Admin\UsedTicketDataTableResource;
 
 class AdminApiController extends Controller
 {
@@ -17,6 +20,9 @@ class AdminApiController extends Controller
         private MetricsService $metricsService
     ) {}
     
+    /**
+     * Estadísticas del dashboard
+     */
     public function getStatistics(Request $request)
     {
         $mainKpis = $this->metricsService->getMainKpis();
@@ -29,20 +35,40 @@ class AdminApiController extends Controller
         ]);
     }
     
-
-    public function getUsedTickets(GetUsedTicketsRequest $request)
+    /**
+     * Obtener tickets usados
+     * Soporta: API REST estándar + DataTables Server-Side Processing
+     * Acepta event_name como parámetro opcional (query string o route param)
+     */
+    public function getUsedTickets(Request $request, ?string $event_name = null)
     {
-        $validated = $request->validated();
-        info('Get Used Tickets Request', $validated);
+        // Detectar si es una solicitud de DataTables
         if ($request->has('draw')) {
-            return $this->getUsedTicketsDataTable($request);
+            return $this->getUsedTicketsDataTable(
+                app(GetUsedTicketsDataTableRequest::class)
+            );
         }
         
+        // API REST estándar
+        return $this->getUsedTicketsApi(
+            app(GetUsedTicketsRequest::class),
+            $event_name
+        );
+    }
+
+    /**
+     * Tickets usados para API REST estándar
+     */
+    private function getUsedTicketsApi(GetUsedTicketsRequest $request, ?string $event_name = null)
+    {
+        $validated = $request->validated();
         $perPage = $validated['per_page'] ?? 15;
         
-        // Usar el AdminReportService para obtener tickets
+        // Priorizar event_name de la ruta, luego del query string
+        $eventNameToSearch = $event_name ?? $validated['event_name'] ?? '';
+        
         $tickets = $this->adminReportService->getUsedTicketsForEvent(
-            eventName: $validated['event_name'] ?? '',
+            eventName: $eventNameToSearch,
             filters: $validated,
             perPage: $perPage
         );
@@ -50,24 +76,28 @@ class AdminApiController extends Controller
         if ($tickets->isEmpty()) {
             return response()->json([
                 'message' => 'No used tickets found',
+                'event_searched' => $eventNameToSearch ?: null,
                 'data' => [],
                 'meta' => [
                     'current_page' => 1,
                     'last_page' => 1,
                     'per_page' => $perPage,
-                    'total' => 0
+                    'total' => 0,
+                    'has_more_pages' => false
                 ]
             ], 200);
         }
         
         return response()->json([
             'message' => 'Used tickets retrieved successfully',
-            'data' => $tickets->items(),
+            'event_searched' => $eventNameToSearch ?: null,
+            'data' => UsedTicketResource::collection($tickets->items()),
             'meta' => [
                 'current_page' => $tickets->currentPage(),
                 'last_page' => $tickets->lastPage(),
                 'per_page' => $tickets->perPage(),
-                'total' => $tickets->total()
+                'total' => $tickets->total(),
+                'has_more_pages' => $tickets->hasMorePages()
             ]
         ]);
     }
@@ -75,47 +105,33 @@ class AdminApiController extends Controller
     /**
      * Tickets usados para DataTables Server-Side Processing
      */
-    private function getUsedTicketsDataTable(Request $request)
+    private function getUsedTicketsDataTable(GetUsedTicketsDataTableRequest $request)
     {
-        $draw = $request->input('draw');
-        $start = $request->input('start', 0);
-        $length = $request->input('length', 15);
+        $validated = $request->validated();
+        $draw = $validated['draw'];
+        $start = $validated['start'];
+        $length = $validated['length'];
         $currentPage = ($start / $length) + 1;
         
         // Establecer la página actual para el paginador de Laravel
         \Illuminate\Pagination\Paginator::currentPageResolver(function () use ($currentPage) {
             return $currentPage;
         });
-        
         $filters = [
-            'event_name' => $request->input('event_name'),
-            'sector' => $request->input('sector'),
-            'event_date' => $request->input('event_date'),
+            'event_name' => $validated['event_name'] ?? null,
+            'sector' => $validated['sector'] ?? null,
+            'event_date' => $validated['event_date'] ?? null,
         ];
-        
-        // Usar el AdminReportService para obtener tickets
+        info('DataTables filtros recibidos: ' . json_encode($filters));
         $tickets = $this->adminReportService->getUsedTicketsForEvent(
             eventName: $filters['event_name'] ?? '',
             filters: array_filter($filters),
             perPage: $length
         );
         
-        // Transformar datos para DataTables
-        $transformedData = collect($tickets->items())->map(function ($ticket) {
-            return [
-                'qr_code' => $ticket->ticket_code,
-                'event_name' => $ticket->event_name,
-                'event_date' => $ticket->event_date,
-                'sector' => $ticket->sector,
-                'user' => [
-                    'name' => $ticket->validator?->name ?? 'N/A',
-                    'email' => $ticket->validator?->email ?? ''
-                ],
-                'validated_at' => $ticket->validated_at?->toISOString()
-            ];
-        })->values()->all();
+        // Transformar datos usando el Resource específico para DataTables
+        $transformedData = UsedTicketDataTableResource::collection($tickets->items());
         
-        Log::info('Used Tickets DataTable', ['filters' => $filters, 'draw' => $draw, 'start' => $start, 'length' => $length]);
         return response()->json([
             'draw' => intval($draw),
             'recordsTotal' => $tickets->total(),
@@ -125,14 +141,13 @@ class AdminApiController extends Controller
     }
     
     /**
-     * Historial de canjes - usando GetRedemptionHistoryRequest
+     * Historial de canjes/redenciones
      */
     public function getRedemptionsHistory(GetRedemptionHistoryRequest $request)
     {
         $validated = $request->validated();
         $perPage = $validated['per_page'] ?? 15;
         
-        // Usar el AdminReportService para obtener redemptions
         $redemptions = $this->adminReportService->getRedemptionHistory(
             filters: $validated,
             perPage: $perPage
@@ -146,7 +161,8 @@ class AdminApiController extends Controller
                     'current_page' => 1,
                     'last_page' => 1,
                     'per_page' => $perPage,
-                    'total' => 0
+                    'total' => 0,
+                    'has_more_pages' => false
                 ]
             ], 200);
         }
@@ -158,7 +174,8 @@ class AdminApiController extends Controller
                 'current_page' => $redemptions->currentPage(),
                 'last_page' => $redemptions->lastPage(),
                 'per_page' => $redemptions->perPage(),
-                'total' => $redemptions->total()
+                'total' => $redemptions->total(),
+                'has_more_pages' => $redemptions->hasMorePages()
             ]
         ]);
     }
@@ -168,7 +185,6 @@ class AdminApiController extends Controller
      */
     public function getReports(Request $request)
     {
-        // Implementar lógica de reportes según necesites
         return response()->json([
             'message' => 'Reports endpoint - implement as needed'
         ]);

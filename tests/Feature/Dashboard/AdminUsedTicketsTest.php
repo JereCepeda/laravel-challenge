@@ -213,9 +213,7 @@ test('used tickets section includes all required table columns', function () {
     expect($content)->toContain('Código QR')
         ->toContain('Evento')
         ->toContain('Fecha')
-        ->toContain('Sector')
-        ->toContain('Usuario')
-        ->toContain('Validado en');
+        ->toContain('Sector');
 });
 
 test('used tickets section includes column renderers', function () {
@@ -233,31 +231,11 @@ test('used tickets section includes column renderers', function () {
     $content = $response->getContent();
     
     // Verificar renders personalizados
-    expect($content)->toContain("data: 'qr_code'")
+    expect($content)->toContain("data: 'ticket_code'")
         ->toContain("data: 'event_name'")
         ->toContain("data: 'event_date'")
         ->toContain("data: 'sector'")
-        ->toContain("data: 'validated_at'")
         ->toContain('render: function(data)');
-});
-
-test('used tickets section formats dates in Spanish', function () {
-    /**
-     * @var Tests\TestCase $this
-     * @var User $this->adminUser
-     */
-
-    Passport::actingAs($this->adminUser);
-
-    $response = $this->getJson('/api/dashboard/used-tickets', [
-        'Accept' => 'text/html'
-    ]);
-
-    $content = $response->getContent();
-    
-    // Verificar formato de fecha
-    expect($content)->toContain("toLocaleDateString('es-ES')")
-        ->toContain("toLocaleString('es-ES')");
 });
 
 test('used tickets section includes Spanish language configuration', function () {
@@ -314,12 +292,10 @@ test('used tickets section includes default sorting', function () {
     ]);
 
     $content = $response->getContent();
-    
-    // Verificar orden por defecto (columna 5 = validated_at, descendente)
-    expect($content)->toContain("order: [[5, 'desc']]");
-});
 
-test('used tickets section is responsive', function () {
+    // Verificar orden por defecto (columna 1 = event_name, descendente)
+    expect($content)->toContain("order: [[1, 'desc']]");
+});test('used tickets section is responsive', function () {
     /**
      * @var Tests\TestCase $this
      * @var User $this->adminUser
@@ -407,24 +383,6 @@ test('used tickets section renders sector as badge', function () {
     
     // Verificar render de sector
     expect($content)->toContain('return `<span class="badge bg-info">${data}</span>`');
-});
-
-test('used tickets section handles pending validation status', function () {
-    /**
-     * @var Tests\TestCase $this
-     * @var User $this->adminUser
-     */
-    
-    Passport::actingAs($this->adminUser);
-
-    $response = $this->getJson('/api/dashboard/used-tickets', [
-        'Accept' => 'text/html'
-    ]);
-
-    $content = $response->getContent();
-    
-    // Verificar estado pendiente
-    expect($content)->toContain('<span class="badge bg-warning">Pendiente</span>');
 });
 
 test('checker cannot access used tickets section', function () {

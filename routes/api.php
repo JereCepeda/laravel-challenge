@@ -3,7 +3,6 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\TicketController;
-use App\Http\Controllers\AdminController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Api\AdminApiController;
 use App\Http\Controllers\Api\CheckerApiController;
@@ -29,10 +28,14 @@ Route::middleware('auth:api')->group(function () {
     
     // Admin APIs
     Route::prefix('admin')->middleware('admin:admin')->group(function () {
-        Route::get('/tickets/used/{event_name}', [AdminController::class, 'getUsedTickets']);
+        // Tickets usados (soporta ambas rutas para compatibilidad)
+        Route::get('/tickets/used/{event_name}', [AdminApiController::class, 'getUsedTickets']);
         Route::get('/tickets/used', [AdminApiController::class, 'getUsedTickets']);
-        Route::get('/redemption/history', [AdminController::class, 'getRedemptionHistory']);
+        
+        // Redemptions/Canjes
         Route::get('/redemptions/history', [AdminApiController::class, 'getRedemptionsHistory']);
+        
+        // Dashboard & Reports
         Route::get('/statistics', [AdminApiController::class, 'getStatistics']);
         Route::get('/reports', [AdminApiController::class, 'getReports']);
     });

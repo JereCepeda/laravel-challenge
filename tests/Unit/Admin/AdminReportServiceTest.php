@@ -22,7 +22,11 @@ class AdminReportServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->redemptions = InvitationRedemption::factory()->count(2)->create();
+        // Crear redemptions con sectores diferentes para asegurar que los filtros funcionen correctamente
+        $this->redemptions = new Collection([
+            InvitationRedemption::factory()->create(['sector' => 'VIP']),
+            InvitationRedemption::factory()->create(['sector' => 'General'])
+        ]);
         $this->tickets = new Collection();
         $role = \App\Models\Role::factory()->create(['slug' => 'admin']);
         $this->user = User::factory()->create(['role_id' => $role->id]);
