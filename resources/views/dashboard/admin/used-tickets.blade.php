@@ -163,13 +163,12 @@
     // Inicializar al cargar la vista
     initDataTable();
     
-    // Aplicar filtros
-    $('#btnApplyFilters').on('click', function() {
+    // Limpiar event listeners previos para evitar duplicados
+    $('#btnApplyFilters').off('click').on('click', function() {
         table.ajax.reload();
     });
     
-    // Refrescar tabla
-    $('#btnRefresh').on('click', function() {
+    $('#btnRefresh').off('click').on('click', function() {
         const btn = $(this);
         btn.html('<i class="bi bi-arrow-clockwise"></i> Actualizando...');
         btn.prop('disabled', true);
@@ -181,7 +180,7 @@
     });
     
     // Permitir buscar al presionar Enter en los filtros
-    $('#filterEventName, #filterSector, #filterEventDate').on('keypress', function(e) {
+    $('#filterEventName, #filterSector, #filterEventDate').off('keypress').on('keypress', function(e) {
         if (e.which === 13) {
             e.preventDefault();
             $('#btnApplyFilters').click();

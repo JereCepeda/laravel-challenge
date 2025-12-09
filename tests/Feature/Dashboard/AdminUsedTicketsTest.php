@@ -171,9 +171,9 @@ test('used tickets section includes apply filters button', function () {
 
     $content = $response->getContent();
     
-    // Verificar botón de aplicar filtros
+    // Verificar botón de aplicar filtros (usa .off().on() para evitar duplicados)
     expect($content)->toContain('id="btnApplyFilters"')
-        ->toContain("$('#btnApplyFilters').on('click'")
+        ->toContain("$('#btnApplyFilters').off('click').on('click'")
         ->toContain('table.ajax.reload()');
 });
 
@@ -190,9 +190,9 @@ test('used tickets section includes refresh button functionality', function () {
 
     $content = $response->getContent();
     
-    // Verificar botón de refrescar
+    // Verificar botón de refrescar (usa .off().on() para evitar duplicados)
     expect($content)->toContain('id="btnRefresh"')
-        ->toContain("$('#btnRefresh').on('click'")
+        ->toContain("$('#btnRefresh').off('click').on('click'")
         ->toContain('Actualizando...');
 });
 
