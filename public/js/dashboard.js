@@ -175,7 +175,6 @@ class DashboardSPA {
     
     executeScripts(container) {
         container.querySelectorAll('script').forEach(oldScript => {
-            // Evitar re-ejecutar el script principal del dashboard
             if (oldScript.src && oldScript.src.includes('dashboard.js')) {
                 return;
             }
@@ -184,6 +183,7 @@ class DashboardSPA {
             Array.from(oldScript.attributes).forEach(attr => {
                 newScript.setAttribute(attr.name, attr.value);
             });
+
             newScript.textContent = oldScript.textContent;
             oldScript.parentNode.replaceChild(newScript, oldScript);
         });

@@ -7,14 +7,12 @@ class GetUsedTicketsRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        // El middleware 'admin:admin' ya validó el rol
         return true;
     }
 
     public function rules(): array
     {
         return [
-            // Filtros de negocio
             'event_name' => 'nullable|string|max:255',
             'sector' => 'nullable|string|max:50',
             'event_date' => 'nullable|date',

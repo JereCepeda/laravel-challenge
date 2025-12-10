@@ -25,14 +25,12 @@ class AdminMiddleware
             ], 401);
         }
 
-        // Cargar la relación role si no está cargada
         if (!$user->relationLoaded('role')) {
             $user->load('role');
         }
 
         $userRole = $user->role->slug;
 
-        // Verificar si el usuario tiene alguno de los roles permitidos
         if (!in_array($userRole, $roles)) {
             return response()->json([
                 'error' => 'Unauthorized access'

@@ -32,20 +32,16 @@
             baseUrl: '{{ url('/') }}'
         };
 
-        // Verificar token INMEDIATAMENTE antes de cualquier otra cosa
         const token = localStorage.getItem('auth_token');
         
         if (!token) {
             console.log('No hay token, redirigiendo al login...');
             window.location.replace('{{ url('/login') }}');
-            // No ejecutar nada más
         } else {
-            // Solo si hay token, cargar el dashboard
             (async function() {
                 try {
                     console.log('Cargando dashboard desde API...');
                     
-                    // Cargar dashboard desde API
                     const response = await fetch('{{ url('/api/dashboard') }}', {
                         headers: {
                             'Authorization': `Bearer ${token}`,
@@ -69,16 +65,13 @@
                     const html = await response.text();
                     console.log('Dashboard cargado correctamente');
                     
-                    // Insertar dashboard
                     document.getElementById('dashboard-app').innerHTML = html;
                     document.getElementById('loadingScreen').style.display = 'none';
 
-                    // Cargar JS del dashboard e inicializar SPA
                     const script = document.createElement('script');
                     script.src = '{{ asset('js/dashboard.js') }}';
                     script.onload = () => {
                         console.log('Dashboard JS cargado');
-                        // Inicializar SPA manualmente después de cargar dinámicamente
                         if (typeof DashboardSPA !== 'undefined') {
                             window.dashboardSPA = new DashboardSPA();
                         }

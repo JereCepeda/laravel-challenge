@@ -7,7 +7,6 @@ class GetRedemptionHistoryRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        // El middleware 'admin:admin' ya validó el rol
         return true;
     }
 

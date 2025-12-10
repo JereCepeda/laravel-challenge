@@ -34,15 +34,6 @@
                             </li>
                         @endif
                         
-                        @if(in_array('view_reports', $permissions))
-                            <li class="nav-item">
-                                <a href="#" class="nav-link spa-link" data-section="reports" data-title="Reportes">
-                                    <i class="bi bi-file-earmark-bar-graph"></i>
-                                    <span>Reportes</span>
-                                </a>
-                            </li>
-                        @endif
-                        
                         @if(in_array('view_statistics', $permissions))
                             <li class="nav-item">
                                 <a href="#" class="nav-link spa-link" data-section="used-tickets" data-title="Tickets Usados">
@@ -58,6 +49,15 @@
                                 <i class="bi bi-clock-history"></i>
                                 <span>Historial de Canjes</span>
                             </a>
+                            </li>
+                        @endif
+                        
+                        @if(in_array('view_reports', $permissions))
+                            <li class="nav-item">
+                                <a href="#" class="nav-link spa-link" data-section="reports" data-title="Reportes">
+                                    <i class="bi bi-file-earmark-bar-graph"></i>
+                                    <span>Reportes</span>
+                                </a>
                             </li>
                         @endif
                     </ul>

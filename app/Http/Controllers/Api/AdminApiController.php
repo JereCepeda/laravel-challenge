@@ -7,11 +7,12 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use App\Services\Admin\MetricsService;
 use App\Services\Admin\AdminReportService;
-use App\Http\Requests\Admin\GetUsedTicketsRequest;
-use App\Http\Requests\Admin\GetUsedTicketsDataTableRequest;
-use App\Http\Requests\Admin\GetRedemptionHistoryRequest;
 use App\Http\Resources\Admin\UsedTicketResource;
+use App\Http\Requests\Admin\GetUsedTicketsRequest;
+use App\Http\Requests\Admin\GetRedemptionHistoryRequest;
 use App\Http\Resources\Admin\UsedTicketDataTableResource;
+use App\Http\Requests\Admin\GetUsedTicketsDataTableRequest;
+use App\Http\Requests\Admin\GetRedemptionHistoryDataTableRequest;
 
 class AdminApiController extends Controller
 {
@@ -35,21 +36,14 @@ class AdminApiController extends Controller
         ]);
     }
     
-    /**
-     * Obtener tickets usados
-     * Soporta: API REST estándar + DataTables Server-Side Processing
-     * Acepta event_name como parámetro opcional (query string o route param)
-     */
     public function getUsedTickets(Request $request, ?string $event_name = null)
     {
-        // Detectar si es una solicitud de DataTables
         if ($request->has('draw')) {
             return $this->getUsedTicketsDataTable(
                 app(GetUsedTicketsDataTableRequest::class)
             );
         }
         
-        // API REST estándar
         return $this->getUsedTicketsApi(
             app(GetUsedTicketsRequest::class),
             $event_name
@@ -64,7 +58,6 @@ class AdminApiController extends Controller
         $validated = $request->validated();
         $perPage = $validated['per_page'] ?? 15;
         
-        // Priorizar event_name de la ruta, luego del query string
         $eventNameToSearch = $event_name ?? $validated['event_name'] ?? '';
         
         $tickets = $this->adminReportService->getUsedTicketsForEvent(
@@ -113,7 +106,6 @@ class AdminApiController extends Controller
         $length = $validated['length'];
         $currentPage = ($start / $length) + 1;
         
-        // Establecer la página actual para el paginador de Laravel
         \Illuminate\Pagination\Paginator::currentPageResolver(function () use ($currentPage) {
             return $currentPage;
         });
@@ -129,7 +121,6 @@ class AdminApiController extends Controller
             perPage: $length
         );
         
-        // Transformar datos usando el Resource específico para DataTables
         $transformedData = UsedTicketDataTableResource::collection($tickets->items());
         
         return response()->json([
@@ -143,7 +134,19 @@ class AdminApiController extends Controller
     /**
      * Historial de canjes/redenciones
      */
-    public function getRedemptionsHistory(GetRedemptionHistoryRequest $request)
+    public function getRedemptionsHistory(Request $request)
+    {
+        if($request->has('draw')) {
+            return $this->getRedemptionsHistoryDataTable(
+                app(GetRedemptionHistoryDataTableRequest::class)
+            );
+
+        }
+        return $this->getRedemptionsHistoryApi(
+            app(GetRedemptionHistoryRequest::class)
+        );
+    }
+    public function getRedemptionsHistoryApi(GetRedemptionHistoryRequest $request)
     {
         $validated = $request->validated();
         $perPage = $validated['per_page'] ?? 15;
@@ -180,13 +183,51 @@ class AdminApiController extends Controller
         ]);
     }
     
-    /**
-     * Reportes del sistema
-     */
+    public function getRedemptionsHistoryDataTable(GetRedemptionHistoryDataTableRequest $request)
+    {
+        $validated = $request->validated();
+        $draw = $validated['draw'];
+        $start = $validated['start'];
+        $length = $validated['length'];
+        $currentPage = ($start / $length) + 1;
+        
+        \Illuminate\Pagination\Paginator::currentPageResolver(function () use ($currentPage) {
+            return $currentPage;
+        });
+        
+        $filters = [
+            'event_name' => $validated['event_name'] ?? null,
+            'sector' => $validated['sector'] ?? null,
+            'event_date' => $validated['event_date'] ?? null,
+        ];
+        
+        $redemptions = $this->adminReportService->getRedemptionHistory(
+            filters: array_filter($filters),
+            perPage: $length
+        );
+        
+        $transformedData = \App\Http\Resources\Admin\RedemptionHistoryDataTableResource::collection($redemptions->items());
+        
+        return response()->json([
+            'draw' => intval($draw),
+            'recordsTotal' => $redemptions->total(),
+            'recordsFiltered' => $redemptions->total(),
+            'data' => $transformedData
+        ]);
+    }
+
+
+    public function getMetrics(Request $request)
+    {
+        return response()->json([
+            'message' => 'Metrics endpoint - implement as needed'
+        ]);
+    }
     public function getReports(Request $request)
     {
         return response()->json([
             'message' => 'Reports endpoint - implement as needed'
         ]);
     }
+
 }

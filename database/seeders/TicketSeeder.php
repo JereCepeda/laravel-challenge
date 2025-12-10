@@ -27,7 +27,7 @@ class TicketSeeder extends Seeder
         $validatedTickets = 0;
         
         foreach ($invitations as $invitation) {
-            // Crear tickets según guest_count
+
             for ($i = 1; $i <= $invitation->guest_count; $i++) {
                 $ticket = Ticket::create([
                     'ticket_code' => $this->generateTicketCode(),
@@ -41,7 +41,7 @@ class TicketSeeder extends Seeder
                 
                 $totalTickets++;
                 
-                // 70% chance de validar si hay validadores y evento no pasó
+
                 if (!$validators->isEmpty() && 
                     $invitation->event_date > now() && 
                     fake()->boolean(70)) {
@@ -56,8 +56,6 @@ class TicketSeeder extends Seeder
                     $validatedTickets++;
                 }
             }
-            
-            // Actualizar tickets_generated
             $invitation->update(['tickets_generated' => $invitation->guest_count]);
         }
     }

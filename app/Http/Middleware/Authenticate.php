@@ -9,7 +9,6 @@ class Authenticate extends Middleware
 {
     protected function authenticate($request, array $guards)
     {
-        // Si no hay token en el header, intentar obtenerlo de la cookie
         if (!$request->bearerToken() && $request->hasCookie('auth_token')) {
             $token = $request->cookie('auth_token');
             $request->headers->set('Authorization', 'Bearer ' . $token);

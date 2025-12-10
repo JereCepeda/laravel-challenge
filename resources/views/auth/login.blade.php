@@ -43,10 +43,8 @@
 (function() {
     'use strict';
     
-    // Verificar si ya está autenticado con un token válido
     const token = localStorage.getItem('auth_token');
     if (token) {
-        // Verificar si el token es válido antes de redirigir
         fetch('{{ url('/api/user') }}', {
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -55,11 +53,9 @@
         })
         .then(response => {
             if (response.ok) {
-                // Token válido, redirigir al dashboard
                 console.log('Token válido, redirigiendo al dashboard...');
                 window.location.replace('{{ url('/dashboard') }}');
             } else {
-                // Token inválido, limpiarlo
                 console.log('Token inválido, limpiando localStorage...');
                 localStorage.removeItem('auth_token');
                 localStorage.removeItem('user');
@@ -83,12 +79,10 @@
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        // Limpiar errores previos
         emailInput.classList.remove('is-invalid');
         passwordInput.classList.remove('is-invalid');
         alertContainer.innerHTML = '';
         
-        // Estado de carga
         btn.disabled = true;
         btnText.classList.add('d-none');
         btnSpinner.classList.remove('d-none');
@@ -110,21 +104,18 @@
             const data = await response.json();
             
             if (response.ok) {
-                // Login exitoso
                 console.log('Login exitoso, guardando token...');
                 localStorage.setItem('auth_token', data.token);
                 localStorage.setItem('user', JSON.stringify(data.user));
                 
-                // Mostrar mensaje de éxito
                 alertContainer.innerHTML = '<div class="alert alert-success">Login exitoso! Redirigiendo...</div>';
                 
-                // Redirigir al dashboard
                 setTimeout(() => {
                     window.location.replace('{{ url('/dashboard') }}');
                 }, 500);
                 
             } else {
-                // Mostrar errores
+
                 if (data.errors) {
                     if (data.errors.email) {
                         emailInput.classList.add('is-invalid');
@@ -141,7 +132,7 @@
                     alertContainer.innerHTML = `<div class="alert alert-danger">${data.message || 'Error al iniciar sesión'}</div>`;
                 }
                 
-                // Restaurar botón
+
                 btn.disabled = false;
                 btnText.classList.remove('d-none');
                 btnSpinner.classList.add('d-none');
@@ -150,7 +141,7 @@
             console.error('Error:', error);
             alertContainer.innerHTML = '<div class="alert alert-danger">Error de conexión. Por favor, intenta nuevamente.</div>';
             
-            // Restaurar botón
+
             btn.disabled = false;
             btnText.classList.remove('d-none');
             btnSpinner.classList.add('d-none');

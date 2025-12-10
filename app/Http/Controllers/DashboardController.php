@@ -19,7 +19,6 @@ class DashboardController extends Controller
         $permissions = $user->role->permissions ?? [];
         $role = $user->role->slug;
         
-        // Vista inicial según rol
         $initialView = match($role) {
             'admin' => 'dashboard.admin.statistics',
             'checker' => 'dashboard.checker.scan-menu',
@@ -40,7 +39,6 @@ class DashboardController extends Controller
         $role = $user->role->slug;
         $permissions = $user->role->permissions ?? [];
         
-        // Mapeo de secciones permitidas por rol
         $allowedSections = $this->getAllowedSections($role, $permissions);
         
         if (!in_array($section, $allowedSections)) {
@@ -50,7 +48,6 @@ class DashboardController extends Controller
             ], 403);
         }
         
-        // Construir path de vista
         $viewPath = "dashboard.{$role}.{$section}";
         
         if (!view()->exists($viewPath)) {
@@ -59,7 +56,6 @@ class DashboardController extends Controller
             ], 404);
         }
         
-        // Preparar datos adicionales según la sección
         $data = $this->getDataForSection($section);
         $data['user'] = $user;
         $data['permissions'] = $permissions;
@@ -94,14 +90,7 @@ class DashboardController extends Controller
      */
     private function getDataForSection(string $section): array
     {
-        info('Filtros para sección: ' . json_encode(\App\Models\Ticket::select('event_name', 'event_date')
-                    ->distinct()
-                    ->groupBy('event_name', 'event_date')
-                    ->orderBy('event_name')
-                    ->orderBy('event_date', 'desc')
-                    ->get()));
-                    
-        return match($section) {
+       return match($section) {
             'used-tickets' => [
                 'events' => \App\Models\Ticket::select('event_name', 'event_date', 'sector')
                     ->distinct()
@@ -116,9 +105,15 @@ class DashboardController extends Controller
                     ->get()
             ],
             'redemptions-history' => [
-                'events' => \App\Models\Ticket::select('event_name')
+                'events' => \App\Models\InvitationRedemption::select('event_name', 'sector', 'event_date', 'tickets_generated', 'invitation_id','guest_count','user_agent','redeemed_at')
                     ->distinct()
                     ->orderBy('event_name')
+                    ->get(),
+                'filters' => \App\Models\InvitationRedemption::select('event_name', 'event_date', 'sector')
+                    ->distinct()
+                    ->groupBy('event_name')
+                    ->orderBy('event_name')
+                    ->orderBy('event_date', 'desc')
                     ->get()
             ],
             default => []

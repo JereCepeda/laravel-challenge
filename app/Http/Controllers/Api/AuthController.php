@@ -22,7 +22,6 @@ class AuthController extends Controller
         try {
             $credentials = $request->only('email', 'password');
             
-            // Validar credenciales
             $validationResult = $this->userValidationService->validateUserCredentials(
                 $credentials['email'], 
                 $credentials['password']
@@ -42,7 +41,6 @@ class AuthController extends Controller
                 'user_id' => $validationResult['user']->id
             ]);
             
-            // Autenticar y generar token
             $user = $this->authService->authenticate($credentials['email'], $credentials['password']);
             $token = $this->authService->generateToken($user, 'API Token');
             

@@ -103,10 +103,10 @@
 
 <script>
 (function() {
-    // Ejecutar inmediatamente al cargar la vista
+
     loadMetrics();
     
-    // Configurar el botón de refresh
+
     const refreshBtn = document.getElementById('refreshMetrics');
     if (refreshBtn) {
         refreshBtn.addEventListener('click', function() {
@@ -151,23 +151,23 @@
     function updateMetricsUI(data) {
         const { main_kpis, additional_metrics, last_updated } = data;
         
-        // KPIs Principales
+
         document.getElementById('totalValidated').textContent = main_kpis.total_tickets_validated.toLocaleString();
         document.getElementById('totalInvitations').textContent = main_kpis.total_invitations_redeemed.toLocaleString();
         document.getElementById('activeEvents').textContent = main_kpis.active_events.toLocaleString();
         document.getElementById('conversionRate').textContent = main_kpis.conversion_rate + '%';
         
-        // Métricas Adicionales
+
         document.getElementById('pendingTickets').textContent = additional_metrics.pending_tickets.toLocaleString();
         document.getElementById('eventsWithValidations').textContent = additional_metrics.events_with_validations.toLocaleString();
         document.getElementById('avgTickets').textContent = additional_metrics.avg_tickets_per_invitation;
         document.getElementById('popularSector').textContent = additional_metrics.most_popular_sector || 'N/A';
         
-        // Última actualización
+
         const lastUpdatedDate = new Date(last_updated);
         document.getElementById('lastUpdated').textContent = lastUpdatedDate.toLocaleString('es-ES');
         
-        // Restaurar botón de refresh
+
         const refreshBtn = document.getElementById('refreshMetrics');
         if (refreshBtn) {
             refreshBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Actualizar';

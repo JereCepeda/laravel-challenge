@@ -65,7 +65,7 @@
 (function() {
     let table;
     
-    // Inicializar DataTable con Server-Side Processing
+
     function initDataTable() {
         if ($.fn.DataTable.isDataTable('#ticketsTable')) {
             $('#ticketsTable').DataTable().destroy();
@@ -84,7 +84,7 @@
                     'X-Requested-With': 'XMLHttpRequest'
                 },
                 data: function(d) {
-                    // Agregar filtros personalizados
+
                     d.event_name = $('#filterEventName').val();
                     d.sector = $('#filterSector').val();
                     d.event_date = $('#filterEventDate').val();
@@ -112,7 +112,6 @@
                 { 
                     data: 'event_date',
                     render: function(data) {
-                        // Ahora data es '2026-01-26', sin hora
                         const [year, month, day] = data.split('-');
                         const date = new Date(year, month - 1, day);
                         return date.toLocaleDateString('es-ES', { 
@@ -160,10 +159,10 @@
         });
     }
     
-    // Inicializar al cargar la vista
+
     initDataTable();
     
-    // Limpiar event listeners previos para evitar duplicados
+
     $('#btnApplyFilters').off('click').on('click', function() {
         table.ajax.reload();
     });
@@ -179,7 +178,7 @@
         });
     });
     
-    // Permitir buscar al presionar Enter en los filtros
+
     $('#filterEventName, #filterSector, #filterEventDate').off('keypress').on('keypress', function(e) {
         if (e.which === 13) {
             e.preventDefault();

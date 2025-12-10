@@ -4,7 +4,7 @@ namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class GetUsedTicketsDataTableRequest extends FormRequest
+class GetRedemptionHistoryDataTableRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -37,7 +37,7 @@ class GetUsedTicketsDataTableRequest extends FormRequest
             'columns.*.orderable' => 'nullable|string|in:true,false',  
             'columns.*.search' => 'sometimes|array',
             'columns.*.search.value' => 'nullable|string',
-            'columns.*.search.regex' => 'nullable|string|in:true,false',
+            'columns.*.search.regex' => 'nullable|string|in:true,false', 
             
             '_' => 'sometimes|integer'
         ];

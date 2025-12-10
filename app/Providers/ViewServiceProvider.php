@@ -8,7 +8,6 @@ class ViewServiceProvider extends ServiceProvider
 {
     public function boot()
     {
-        // Aplicar a vistas específicas
     }
 
     public function register()

@@ -56,7 +56,6 @@ class MetricsService
             return 0.0;
         }
         
-        // Contar invitaciones que tienen al menos 1 ticket validado
         $invitationsWithValidatedTickets = InvitationRedemption::whereHas('tickets', function($query) {
             $query->where('is_validated', true);
         })->count();

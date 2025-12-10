@@ -13,9 +13,7 @@ class InvitationSeeder extends Seeder
      */
     public function run(): void
     {
-        // Eventos variados con diferentes escenarios
         $invitations = [
-            // Eventos pasados
             [
                 'invitation_id' => 'INV-' . strtoupper(Str::random(8)),
                 'event_name' => 'Rock Festival 2024',
@@ -31,7 +29,6 @@ class InvitationSeeder extends Seeder
                 'guest_count' => 1,
             ],
             
-            // Eventos próximos (para validar)
             [
                 'invitation_id' => 'INV-' . strtoupper(Str::random(8)),
                 'event_name' => 'Electronic Music Party',
@@ -54,7 +51,6 @@ class InvitationSeeder extends Seeder
                 'guest_count' => 1,
             ],
             
-            // Eventos futuros - Primera función de Classical Concert
             [
                 'invitation_id' => 'INV-' . strtoupper(Str::random(8)),
                 'event_name' => 'Classical Concert',
@@ -62,7 +58,6 @@ class InvitationSeeder extends Seeder
                 'sector' => 'Platea',
                 'guest_count' => 4,
             ],
-            // Segunda función de Classical Concert (2 días después)
             [
                 'invitation_id' => 'INV-' . strtoupper(Str::random(8)),
                 'event_name' => 'Classical Concert',
@@ -70,7 +65,6 @@ class InvitationSeeder extends Seeder
                 'sector' => 'Palco',
                 'guest_count' => 2,
             ],
-            // Primera función de Metal Festival
             [
                 'invitation_id' => 'INV-' . strtoupper(Str::random(8)),
                 'event_name' => 'Metal Festival',
@@ -78,7 +72,7 @@ class InvitationSeeder extends Seeder
                 'sector' => 'VIP',
                 'guest_count' => 1,
             ],
-            // Segunda función de Metal Festival (3 días después)
+
             [
                 'invitation_id' => 'INV-' . strtoupper(Str::random(8)),
                 'event_name' => 'Metal Festival',
