@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Ticket;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use App\Models\InvitationRedemption;
 
 class DashboardController extends Controller
 {
@@ -55,7 +56,6 @@ class DashboardController extends Controller
                 'error' => 'Sección no encontrada'
             ], 404);
         }
-        
         $data = $this->getDataForSection($section);
         $data['user'] = $user;
         $data['permissions'] = $permissions;
@@ -90,30 +90,29 @@ class DashboardController extends Controller
      */
     private function getDataForSection(string $section): array
     {
-       return match($section) {
+        return match($section) {
+        
             'used-tickets' => [
-                'events' => \App\Models\Ticket::select('event_name', 'event_date', 'sector')
-                    ->distinct()
+                'events' => Ticket::select('event_name', 'event_date', 'sector')
                     ->groupBy('event_name', 'event_date', 'sector')
                     ->orderBy('event_date', 'desc')
                     ->get(),
-                'filters' => \App\Models\Ticket::select('event_name', 'event_date')
+                    
+                'filters' => Ticket::select('event_name', 'event_date')
                     ->distinct()
-                    ->groupBy('event_name')
+                    ->groupBy('event_name', 'event_date')
                     ->orderBy('event_name')
-                    ->orderBy('event_date', 'desc')
                     ->get()
             ],
             'redemptions-history' => [
-                'events' => \App\Models\InvitationRedemption::select('event_name', 'sector', 'event_date', 'tickets_generated', 'invitation_id','guest_count','user_agent','redeemed_at')
-                    ->distinct()
+                'events' => InvitationRedemption::select('event_name', 'sector', 'event_date', 'tickets_generated', 'invitation_id','guest_count','user_agent','redeemed_at')
+                    
                     ->orderBy('event_name')
                     ->get(),
-                'filters' => \App\Models\InvitationRedemption::select('event_name', 'event_date', 'sector')
+                'filters' => InvitationRedemption::select('event_name', 'event_date', 'sector')
                     ->distinct()
-                    ->groupBy('event_name')
+                    ->groupBy('event_name', 'event_date', 'sector')
                     ->orderBy('event_name')
-                    ->orderBy('event_date', 'desc')
                     ->get()
             ],
             default => []

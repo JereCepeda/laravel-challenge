@@ -6,10 +6,12 @@ use Illuminate\Http\JsonResponse;
 use App\Exceptions\TicketException;
 use App\Exceptions\InvitationException;
 use App\Exceptions\ExternalApiException;
-use App\Http\Requests\RedeemInvitationRequest;
 use App\Services\Ticket\InvitationService;
 use App\Http\Requests\ValidateTicketRequest;
+use App\Http\Requests\RedeemInvitationRequest;
 use App\Services\Ticket\TicketValidationService;
+use App\Http\Resources\Ticket\TicketSuccessResource;
+use App\Http\Resources\Ticket\InvitationSuccessResource;
 
 class TicketController extends Controller
 {
@@ -24,17 +26,8 @@ class TicketController extends Controller
         $hash = $request->validated()['hash'];
         try {
             $result = $this->invitationService->redeemInvitation($hash);
-
-            return response()->json([
-                'message' => 'Invitation redeemed successfully',
-                'event' => [
-                    'name' => $result['invitation_data']['event_name'],
-                    'date' => $result['invitation_data']['event_date'],
-                    'sector' => $result['invitation_data']['sector']
-                ],
-                'tickets' => $result['tickets']
-            ], 201);
-
+            info('Invitation redeemed successfully', ['result' => $result]);
+            return InvitationSuccessResource::make((object)$result)->response()->setStatusCode(201);
         } catch (InvitationException $e) {
             return response()->json([
                 'error' => $e->getMessage()
@@ -60,18 +53,7 @@ class TicketController extends Controller
 
         try {
             $result = $this->ticketValidationService->validateTicket($ticketCode);
-
-            return response()->json([
-                'access_granted' => $result['access_granted'],
-                'message' => $result['message'],
-                'ticket_info' => [
-                    'code' => $result['ticket']['ticket_code'],
-                    'event' => $result['ticket']['event_name'],
-                    'sector' => $result['ticket']['sector'],
-                    'validated_at' => $result['ticket']['validated_at']
-                ]
-            ]);
-
+            return TicketSuccessResource::make((object)$result)->response()->setStatusCode(200);
         } catch (TicketException $e) {
             return response()->json([
                 'access_granted' => false,
