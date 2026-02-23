@@ -42,5 +42,7 @@ Route::post('/invitations/{hash}/redeem', [TicketController::class, 'redeemInvit
 
     Route::prefix('checker')->middleware('admin:admin,checker')->group(function () {
         Route::get('/events', [CheckerApiController::class, 'getActiveEvents']);
+        Route::get('/stats/today', [CheckerApiController::class, 'getTodayStats']);
+        Route::get('/history', [CheckerApiController::class, 'getValidationHistory']);
     });
 });

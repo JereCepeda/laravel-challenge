@@ -66,23 +66,29 @@ php artisan key:generate
 
 ### 3. **Database Setup & Migration**
 ```bash
-# Run database migrations
+# Run all database migrations (includes Passport OAuth tables)
 php artisan migrate
 
 # Seed with roles and test data
 php artisan db:seed
 
-# Verify tables were created successfully
+# Verify all tables were created successfully
 php artisan migrate:status
 ```
 
-### 4. **Authentication System Setup**
+### 4. **Passport OAuth2 Setup**
 ```bash
-# Install Laravel Passport for OAuth2
-php artisan passport:install
+# Create personal access token client
+php artisan passport:client --personal --name="Laravel Personal Access Client" --no-interaction
 
-# Note the generated client credentials for API authentication
+# Create password grant client (save the Client Secret shown)
+php artisan passport:client --password --name="Laravel Password Grant Client" --no-interaction
+
+# Verify OAuth clients were created
+php artisan tinker --execute="echo 'OAuth Clients: ' . DB::table('oauth_clients')->count();"
 ```
+
+> **⚠️ Important:** Do NOT run `php artisan vendor:publish --tag=passport-migrations` as Passport migrations are already included in this repository. Running this command will create duplicate migration files.
 
 ### 5. **Background Job System**
 ```bash
@@ -321,6 +327,31 @@ php artisan test --filter="auth|security" --verbose
 # Check encryption is working properly:
 php artisan tinker
 >>> encrypt('test')  # Should return encrypted string without errors
+```
+
+#### **Passport Installation & Migration Issues**
+```bash
+# ⚠️ Error: "Table 'oauth_auth_codes' already exists"
+# This occurs when Passport migrations are published multiple times
+
+# Solution 1: Remove duplicate migration files
+Get-ChildItem database\migrations\ -Filter "*oauth*" | Select-Object Name, LastWriteTime
+# Delete the newer duplicates (higher timestamps), keep original 5 files
+
+# Solution 2: Fresh migration (⚠️ WARNING: Deletes all data)
+php artisan migrate:fresh --seed
+
+# Solution 3: Check for duplicate migrations before migrating
+ls database/migrations/*oauth* | wc -l  # Should return exactly 5
+# If more than 5, identify and remove duplicates using timestamps
+
+# Verify OAuth clients exist:
+php artisan tinker --execute="echo DB::table('oauth_clients')->count();"
+# Should return 2 (personal access + password grant)
+
+# Re-create OAuth clients if missing (without creating migrations):
+php artisan passport:client --personal --no-interaction
+php artisan passport:client --password --no-interaction
 ```
 
 #### **Database Security Issues**
