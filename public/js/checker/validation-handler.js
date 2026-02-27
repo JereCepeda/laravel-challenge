@@ -14,12 +14,13 @@ window.TicketValidationHandler = (function() {
     // Usar baseUrl dinámico de window.App o fallback a /api
     function getApiBaseUrl() {
         const baseUrl = (window.App && window.App.baseUrl) ? window.App.baseUrl + '/api' : '/api';
-        console.log('🔗 API Base URL:', baseUrl, '| window.App:', window.App);
+        console.log('API Base URL:', baseUrl, '| window.App:', window.App);
         return baseUrl;
     }
     
     const ENDPOINTS = {
         VALIDATE: '/tickets/validate',
+        INVITATIONS: '/checker/invitations',
         STATS: '/checker/stats/today',
         HISTORY: '/checker/history'
     };
@@ -100,7 +101,7 @@ window.TicketValidationHandler = (function() {
             return { success: true, data };
 
         } catch (error) {
-            console.error('❌ Request error:', error);
+            console.error('Request error:', error);
             return { 
                 success: false, 
                 message: error.message || 'Error de conexión con el servidor'
@@ -116,22 +117,23 @@ window.TicketValidationHandler = (function() {
      * @returns {Promise<Object>} Resultado de la validación
      */
     async function validateTicket(ticketCode) {
-        console.log('🔍 Validando ticket:', ticketCode);
+        console.log('Validando ticket:', ticketCode);
 
         const url = `${getApiBaseUrl()}${ENDPOINTS.VALIDATE}`;
+        console.log('URL de validacion:', url);
         const result = await makeRequest(url, {
             method: 'POST',
             body: JSON.stringify({ ticket_code: ticketCode })
         });
 
         if (result.success) {
-            console.log('✅ Ticket validado exitosamente:', result.data);
+            console.log('Ticket validado exitosamente:', result.data);
             return {
                 success: true,
                 data: result.data.ticket || result.data
             };
         } else {
-            console.error('❌ Error al validar ticket:', result.message);
+            console.error('Error al validar ticket:', result.message);
             return {
                 success: false,
                 message: result.message || 'Ticket inválido o ya utilizado'
@@ -139,12 +141,15 @@ window.TicketValidationHandler = (function() {
         }
     }
 
+    async function getInvitations() {}
+    
+
     /**
      * Obtener estadísticas del día actual
      * @returns {Promise<Object>} Estadísticas del checker
      */
     async function getTodayStats() {
-        console.log('📊 Obteniendo estadísticas del día...');
+        console.log('Obteniendo estadisticas del dia...');
 
         const url = `${getApiBaseUrl()}${ENDPOINTS.STATS}`;
         const result = await makeRequest(url, {
@@ -152,10 +157,10 @@ window.TicketValidationHandler = (function() {
         });
 
         if (result.success) {
-            console.log('✅ Estadísticas obtenidas:', result.data);
+            console.log('Estadisticas obtenidas:', result.data);
             return result.data;
         } else {
-            console.error('❌ Error al obtener estadísticas');
+            console.error('Error al obtener estadisticas');
             return {
                 validated_today: 0,
                 validation_rate: 0,
@@ -170,7 +175,7 @@ window.TicketValidationHandler = (function() {
      * @returns {Promise<Object>} Historial de validaciones
      */
     async function getValidationHistory(limit = 5) {
-        console.log(`📜 Obteniendo historial (últimos ${limit})...`);
+        console.log(`Obteniendo historial (ultimos ${limit})...`);
 
         const url = `${getApiBaseUrl()}${ENDPOINTS.HISTORY}?limit=${limit}`;
         const result = await makeRequest(url, {
@@ -178,10 +183,10 @@ window.TicketValidationHandler = (function() {
         });
 
         if (result.success) {
-            console.log('✅ Historial obtenido:', result.data);
+            console.log('Historial obtenido:', result.data);
             return result.data;
         } else {
-            console.error('❌ Error al obtener historial');
+            console.error('Error al obtener historial');
             return { data: [] };
         }
     }
@@ -191,7 +196,7 @@ window.TicketValidationHandler = (function() {
      * @returns {Promise<Array>} Lista de eventos activos
      */
     async function getActiveEvents() {
-        console.log('🎫 Obteniendo eventos activos...');
+        console.log('Obteniendo eventos activos...');
 
         const url = `${getApiBaseUrl()}/checker/events`;
         const result = await makeRequest(url, {
@@ -199,23 +204,51 @@ window.TicketValidationHandler = (function() {
         });
 
         if (result.success) {
-            console.log('✅ Eventos activos obtenidos:', result.data);
+            console.log('Eventos activos obtenidos:', result.data);
             return result.data.data || [];
         } else {
-            console.error('❌ Error al obtener eventos');
+            console.error('Error al obtener eventos');
             return [];
+        }
+    }
+
+    /**
+     * Redimir una invitación por hash
+     * @param {string} hash - Hash de la invitación (6 caracteres)
+     * @returns {Promise<Object>} Resultado de la redención
+     */
+    async function redeemInvitation(hash) {
+        console.log('Canjeando invitacion:', hash);
+
+        const url = `${getApiBaseUrl()}/invitations/${hash}/redeem`;
+        console.log('URL de canje:', url);
+        
+        const result = await makeRequest(url, {
+            method: 'POST'
+        });
+
+        if (result.success) {
+            console.log('Invitacion canjeada exitosamente:', result.data);
+            return {
+                success: true,
+                data: result.data
+            };
+        } else {
+            console.error('Error al canjear invitacion:', result.message);
+            return {
+                success: false,
+                message: result.message || 'Invitacion invalida o ya canjeada'
+            };
         }
     }
 
     // ===== EXPORT PÚBLICO =====
     return {
         validate: validateTicket,
+        redeemInvitation: redeemInvitation,
         getStats: getTodayStats,
         getHistory: getValidationHistory,
         getActiveEvents: getActiveEvents
     };
 
 })();
-
-// Log de inicialización
-console.log('✅ TicketValidationHandler inicializado y listo');

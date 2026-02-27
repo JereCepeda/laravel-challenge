@@ -6,23 +6,31 @@ use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase
 {
-    /**
-     * Define environment setup.
-     *
-     * @param  \Illuminate\Foundation\Application  $app
-     * @return void
-     */
-    protected function getEnvironmentSetUp($app)
+    use CreatesApplication;
+    
+    protected function setUp(): void
     {
-        // Load .env.testing if it exists, otherwise use defaults
-        if (file_exists(base_path('.env.testing'))) {
-            $dotenv = \Dotenv\Dotenv::createImmutable(base_path(), '.env.testing');
-            $dotenv->load();
-        }
+        parent::setUp();
         
-        // Generate APP_KEY if not set in environment
-        if (!$app['config']['app.key']) {
-            $app['config']['app.key'] = 'base64:' . base64_encode(random_bytes(32));
-        }
+        // Fix: Force la URL raíz para evitar que Laravel detecte el subdirectorio XAMPP
+        // Sin esto, Laravel genera URLs como "http://localhost/laravel-challenge/public/api/..."
+        // causando que las rutas no se encuentren en los tests (404)
+        config(['app.url' => 'http://localhost']);
+        \Illuminate\Support\Facades\URL::forceRootUrl('http://localhost');
+    }
+}
+
+trait CreatesApplication
+{
+    /**
+     * Creates the application.
+     */
+    public function createApplication(): \Illuminate\Foundation\Application
+    {
+        $app = require __DIR__.'/../bootstrap/app.php';
+        
+        $app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+        
+        return $app;
     }
 }

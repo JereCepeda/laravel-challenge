@@ -170,6 +170,9 @@ class AdminReportServiceTest extends TestCase
 
     public function test_get_redemption_history_applies_date_filters()
     {
+        // Limpiar redemptions creadas en setUp() para este test específico
+        InvitationRedemption::query()->delete();
+        
         InvitationRedemption::factory()->create([
             'event_name' => 'Past Event',
             'redeemed_at' => now()->subDays(5)

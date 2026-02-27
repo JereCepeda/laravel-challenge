@@ -52,7 +52,7 @@
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <link rel="stylesheet" href="{{ asset('css/checker.css') }}?v={{ time() }}">
     <script src="{{ asset('js/checker/validation-handler.js') }}?v={{ time() }}"></script>
-    <script src="{{ asset('js/checker/qr-scanner.js') }}?v={{ time() }}"></script>
+    <script src="{{ asset('js/checker/qr-scanner-store.js') }}?v={{ time() }}"></script>
     @endif
     
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>

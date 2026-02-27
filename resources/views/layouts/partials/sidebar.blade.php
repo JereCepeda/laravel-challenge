@@ -72,6 +72,12 @@
                             <span>Escanear QR</span>
                         </a>
                     @endif
+                    @if(in_array('redeem_invitation', $permissions))
+                        <a href="#" class="nav-link spa-link" data-section="redeem-invitation" data-title="Redimir Invitación">
+                            <i class="bi bi-gift"></i>
+                            <span>Intercambio de Invitación/Ticket</span>
+                        </a>
+                    @endif
                 @endif
             </nav>
         </div>
