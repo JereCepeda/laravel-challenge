@@ -58,6 +58,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Use Mock API for External Services
+    |--------------------------------------------------------------------------
+    |
+    | When true, the application will use local mock endpoints instead of
+    | calling external APIs. Useful for development and testing.
+    |
+    */
+
+    'use_mock_api' => env('USE_MOCK_API', true),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------
     |

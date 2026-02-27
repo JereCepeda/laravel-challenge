@@ -14,6 +14,19 @@ class ExternalApiService
     private const TIMEOUT = 10; 
     private const CACHE_TTL = 300; 
 
+    /**
+     * Obtener la URL base de la API (externa o mock local)
+     */
+    private function getApiUrl(): string
+    {
+        // Si USE_MOCK_API=true en .env, usar mock local
+        if (config('app.use_mock_api', false)) {
+            return config('app.url') . '/api/mock/invitations/';
+        }
+        
+        return self::EXTERNAL_API_URL;
+    }
+
     public function getInvitationData(string $hash): array
     {
         $cacheKey = "invitation_data_{$hash}";
@@ -23,10 +36,15 @@ class ExternalApiService
             Log::info("Invitation data retrieved from cache", ['hash' => $hash]);
             return $cachedData;
         }
+
+        $apiUrl = $this->getApiUrl();
+        
         try {
-            $response = Http::withHeaders(['Authorization' => 'Bearer ' . self::API_TOKEN])->timeout(self::TIMEOUT)
+            $response = Http::withHeaders(['Authorization' => 'Bearer ' . self::API_TOKEN])
+                ->timeout(self::TIMEOUT)
                 ->retry(3, 1000)
-                ->get(self::EXTERNAL_API_URL . $hash);
+                ->withOptions(['verify' => false]) // SOLO PARA DESARROLLO: deshabilitar verificacion SSL
+                ->get($apiUrl . $hash);
             if (!$response->successful()) {
                 throw new ExternalApiException(
                     "External API returned status: {$response->status()}",

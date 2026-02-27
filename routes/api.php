@@ -6,9 +6,15 @@ use App\Http\Controllers\TicketController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Api\AdminApiController;
 use App\Http\Controllers\Api\CheckerApiController;
+use App\Http\Controllers\MockExternalApiController;
 
 
 Route::post('/login', [AuthController::class, 'login']);
+
+// Mock de API externa para pruebas (solo desarrollo)
+Route::get('/mock/invitations/{hash}', [MockExternalApiController::class, 'getInvitation'])
+    ->where('hash', '[a-z0-9]{6}');
+
 Route::post('/invitations/{hash}/redeem', [TicketController::class, 'redeemInvitation'])
     ->where('hash', '[a-z0-9]{6}');
 

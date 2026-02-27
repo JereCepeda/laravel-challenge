@@ -152,96 +152,47 @@ class DashboardSPA {
      * Inyecta contenido HTML procesando scripts ANTES de que Alpine lo vea
      */
     async injectContentWithScripts(html) {
-        // 1. Reemplazar x-data en el HTML string antes de parsearlo
-        // Usamos un placeholder que Alpine no reconoce
-        let processedHtml = html.replace(/x-data=/g, 'data-x-data-deferred=');
-
-        // 2. Crear contenedor temporal FUERA del DOM
         const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = processedHtml;
+        tempDiv.innerHTML = html;
 
-        // 3. Extraer scripts 
         const scripts = Array.from(tempDiv.querySelectorAll('script'));
-        const externalScripts = [];
-        const inlineScripts = [];
+        scripts.forEach(s => s.remove());
 
-        scripts.forEach(script => {
-            if (script.src) {
-                if (!script.src.includes('dashboard.js')) {
-                    externalScripts.push(script.src);
-                }
-            } else if (script.textContent.trim()) {
-                inlineScripts.push(script.textContent);
-            }
-            script.remove();
-        });
-
-        // 4. Inyectar HTML (sin x-data, Alpine lo ignora completamente)
         this.contentContainer.innerHTML = tempDiv.innerHTML;
 
-        // 5. Cargar scripts externos en orden SECUENCIAL
-        for (const src of externalScripts) {
-            await this.loadExternalScriptByUrl(src);
-        }
-
-        // 6. Ejecutar scripts inline
-        for (const code of inlineScripts) {
-            try {
-                const fn = new Function(code);
-                fn();
-            } catch (e) {
-                console.error('Error ejecutando script inline:', e);
+        for (const script of scripts) {
+            if (script.src && !script.src.includes('dashboard.js')) {
+                await this.loadExternalScript(script);
+            } else if (script.textContent.trim()) {
+                new Function(script.textContent)();
             }
         }
-
-        // 7. Ahora que los scripts cargaron, restaurar x-data y activar Alpine
-        const pendingElements = this.contentContainer.querySelectorAll('[data-x-data-deferred]');
-        
-        pendingElements.forEach(el => {
-            const xDataValue = el.getAttribute('data-x-data-deferred');
-            el.removeAttribute('data-x-data-deferred');
-            el.setAttribute('x-data', xDataValue);
-            
-            // Inicializar Alpine en este elemento
-            if (window.Alpine) {
-                window.Alpine.initTree(el);
-            }
-        });
-
-        console.log(`✅ Contenido inyectado. Scripts: ${externalScripts.length} externos, ${inlineScripts.length} inline. Alpine elements: ${pendingElements.length}`);
     }
 
     /**
-     * Carga un script externo por URL
+     * Espera a que un componente Alpine este registrado
      */
-    loadExternalScriptByUrl(src) {
+    waitForAlpineComponent(componentName, timeout = 3000) {
         return new Promise((resolve) => {
-            // Normalizar URL
-            const normalizedSrc = src.startsWith('http') ? src : new URL(src, window.location.origin).href;
+            const startTime = Date.now();
 
-            // Ya cargado?
-            if (this.loadedScripts.has(normalizedSrc)) {
-                console.log(`Script cargado: ${src}`);
-                return resolve();
-            }
+            const checkComponent = () => {
+                // Verificar si existe en Alpine.data o en window
+                const inAlpine = window.Alpine && window.Alpine.raw && window.Alpine.raw[componentName];
+                const inWindow = window[componentName];
 
-            console.log(`Cargando script: ${src}`);
-
-            const script = document.createElement('script');
-            script.src = src;
-            
-            script.onload = () => {
-                console.log(`Script cargado: ${src}`);
-                this.loadedScripts.add(normalizedSrc);
-                resolve();
-            };
-            
-            script.onerror = () => {
-                console.error(`Error cargando script: ${src}`);
-                resolve(); // Continuar aunque falle
+                if (inAlpine || inWindow) {
+                    console.log('Componente Alpine detectado:', componentName);
+                    resolve(true);
+                } else if (Date.now() - startTime > timeout) {
+                    console.warn('Timeout esperando componente:', componentName);
+                    resolve(false);
+                } else {
+                    setTimeout(checkComponent, 50);
+                }
             };
 
-            document.head.appendChild(script);
+            checkComponent();
         });
     }
 

@@ -31,7 +31,8 @@ class RoleSeeder extends Seeder
                 'description' => 'Content checker with limited permissions',
                 'permissions' => [ 
                     'validate_tickets',
-                    'check_ticket_status'
+                    'check_ticket_status',
+                    'redeem_invitation',
                 ],
                 'is_active' => true,
             ],

@@ -10,78 +10,51 @@ class InvitationSeeder extends Seeder
 {
     /**
      * Run the database seeds.
+     * 
+     * NOTA: Este seeder NO crea invitaciones en la API externa.
+     * Solo simula invitaciones YA CANJEADAS para testing del historial.
+     * 
+     * Para probar el canje de invitaciones, usa los hashes validos:
+     * a8f22d, a8f22e, a8f22f, b9g33e, b9g33f, b9g33g, c0h44f, c0h44g, c0h44h, d1i55h,
+     * d1i55g, d1i55i, e2j66h, e2j66i, f3k77i, f3k77j, f3k77k, g4l88j, g4l88k, h5m99k,
+     * h5m99l, h5m99m, i6n00l, i6n00m, j7o11m, j7o11n, k8p22n, k8p22o, k8p22p, l9q33o, l9q33p
      */
     public function run(): void
     {
+        // Hashes validos de la API externa (solo algunos para simular ya canjeados)
+        $validHashes = ['a8f22d', 'a8f22e', 'b9g33e', 'c0h44f', 'd1i55h'];
+        
         $invitations = [
             [
-                'invitation_id' => 'INV-' . strtoupper(Str::random(8)),
+                'invitation_id' => $validHashes[0],
                 'event_name' => 'Rock Festival 2024',
                 'event_date' => now()->subDays(30),
                 'sector' => 'VIP',
                 'guest_count' => 2,
             ],
             [
-                'invitation_id' => 'INV-' . strtoupper(Str::random(8)),
+                'invitation_id' => $validHashes[1],
                 'event_name' => 'Jazz Night',
                 'event_date' => now()->subDays(15),
                 'sector' => 'General',
                 'guest_count' => 1,
             ],
-            
             [
-                'invitation_id' => 'INV-' . strtoupper(Str::random(8)),
+                'invitation_id' => $validHashes[2],
                 'event_name' => 'Electronic Music Party',
                 'event_date' => now()->addDays(3),
                 'sector' => 'VIP',
                 'guest_count' => 3,
             ],
             [
-                'invitation_id' => 'INV-' . strtoupper(Str::random(8)),
-                'event_name' => 'Electronic Music Party',
-                'event_date' => now()->addDays(8),
-                'sector' => 'General',
-                'guest_count' => 2,
-            ],
-            [
-                'invitation_id' => 'INV-' . strtoupper(Str::random(8)),
+                'invitation_id' => $validHashes[3],
                 'event_name' => 'Comedy Show',
                 'event_date' => now()->addDays(5),
                 'sector' => 'Premium',
                 'guest_count' => 1,
             ],
-            
             [
-                'invitation_id' => 'INV-' . strtoupper(Str::random(8)),
-                'event_name' => 'Classical Concert',
-                'event_date' => now()->addDays(20),
-                'sector' => 'Platea',
-                'guest_count' => 4,
-            ],
-            [
-                'invitation_id' => 'INV-' . strtoupper(Str::random(8)),
-                'event_name' => 'Classical Concert',
-                'event_date' => now()->addDays(22),
-                'sector' => 'Palco',
-                'guest_count' => 2,
-            ],
-            [
-                'invitation_id' => 'INV-' . strtoupper(Str::random(8)),
-                'event_name' => 'Metal Festival',
-                'event_date' => now()->addDays(45),
-                'sector' => 'VIP',
-                'guest_count' => 1,
-            ],
-
-            [
-                'invitation_id' => 'INV-' . strtoupper(Str::random(8)),
-                'event_name' => 'Metal Festival',
-                'event_date' => now()->addDays(48),
-                'sector' => 'General',
-                'guest_count' => 3,
-            ],
-            [
-                'invitation_id' => 'INV-' . strtoupper(Str::random(8)),
+                'invitation_id' => $validHashes[4],
                 'event_name' => 'Pop Concert 2025',
                 'event_date' => now()->addDays(60),
                 'sector' => 'VIP',

@@ -30,7 +30,8 @@ class TicketController extends Controller
             return InvitationSuccessResource::make((object)$result)->response()->setStatusCode(201);
         } catch (InvitationException $e) {
             return response()->json([
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'already_redeemed' => str_contains($e->getMessage(), 'already')
             ], $e->getCode());
 
         } catch (ExternalApiException $e) {
@@ -40,9 +41,16 @@ class TicketController extends Controller
             ], $e->getCode());
 
         } catch (\Exception $e) {
+            \Log::error('Unexpected error redeeming invitation', [
+                'hash' => $hash,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
             return response()->json([
                 'error' => 'An unexpected error occurred',
-                'message' => 'Please try again later'
+                'message' => 'Please try again later',
+                'debug' => config('app.debug') ? $e->getMessage() : null
             ], 500);
         }
     }
