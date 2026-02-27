@@ -11,7 +11,13 @@ window.TicketValidationHandler = (function() {
     'use strict';
 
     // ===== CONFIGURACIÓN =====
-    const API_BASE_URL = '/api';
+    // Usar baseUrl dinámico de window.App o fallback a /api
+    function getApiBaseUrl() {
+        const baseUrl = (window.App && window.App.baseUrl) ? window.App.baseUrl + '/api' : '/api';
+        console.log('🔗 API Base URL:', baseUrl, '| window.App:', window.App);
+        return baseUrl;
+    }
+    
     const ENDPOINTS = {
         VALIDATE: '/tickets/validate',
         STATS: '/checker/stats/today',
@@ -112,7 +118,7 @@ window.TicketValidationHandler = (function() {
     async function validateTicket(ticketCode) {
         console.log('🔍 Validando ticket:', ticketCode);
 
-        const url = `${API_BASE_URL}${ENDPOINTS.VALIDATE}`;
+        const url = `${getApiBaseUrl()}${ENDPOINTS.VALIDATE}`;
         const result = await makeRequest(url, {
             method: 'POST',
             body: JSON.stringify({ ticket_code: ticketCode })
@@ -140,7 +146,7 @@ window.TicketValidationHandler = (function() {
     async function getTodayStats() {
         console.log('📊 Obteniendo estadísticas del día...');
 
-        const url = `${API_BASE_URL}${ENDPOINTS.STATS}`;
+        const url = `${getApiBaseUrl()}${ENDPOINTS.STATS}`;
         const result = await makeRequest(url, {
             method: 'GET'
         });
@@ -166,7 +172,7 @@ window.TicketValidationHandler = (function() {
     async function getValidationHistory(limit = 5) {
         console.log(`📜 Obteniendo historial (últimos ${limit})...`);
 
-        const url = `${API_BASE_URL}${ENDPOINTS.HISTORY}?limit=${limit}`;
+        const url = `${getApiBaseUrl()}${ENDPOINTS.HISTORY}?limit=${limit}`;
         const result = await makeRequest(url, {
             method: 'GET'
         });
@@ -187,7 +193,7 @@ window.TicketValidationHandler = (function() {
     async function getActiveEvents() {
         console.log('🎫 Obteniendo eventos activos...');
 
-        const url = `${API_BASE_URL}/checker/events`;
+        const url = `${getApiBaseUrl()}/checker/events`;
         const result = await makeRequest(url, {
             method: 'GET'
         });

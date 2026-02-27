@@ -157,7 +157,7 @@ function qrScannerComponent() {
 
             console.log('🔍 Iniciando validación manual:', code);
             await this.validateTicket(code);
-            this.manualCode = ''; // Limpiar input
+            this.manualCode = '';
         },
 
         // ===== MANEJO DE RESULTADOS =====
@@ -312,7 +312,18 @@ function qrScannerComponent() {
     };
 }
 
-// Inicializar cuando Alpine.js esté listo
-document.addEventListener('alpine:init', () => {
-    console.log('🎨 Alpine.js inicializado - Componente QR Scanner listo');
-});
+// Exponer explícitamente en window para Alpine
+window.qrScannerComponent = qrScannerComponent;
+
+// Registrar con Alpine.data() si Alpine ya está disponible
+if (typeof Alpine !== 'undefined') {
+    Alpine.data('qrScannerComponent', qrScannerComponent);
+    console.log('🎨 QR Scanner Component registrado con Alpine.data()');
+} else {
+    // Si Alpine no está listo, esperar al evento
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('qrScannerComponent', qrScannerComponent);
+        console.log('🎨 QR Scanner Component registrado con Alpine.data() (deferred)');
+    });
+    console.log('🎨 QR Scanner Component registrado en window.qrScannerComponent');
+}

@@ -25,6 +25,7 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+    <!-- Alpine.js se carga manualmente después de los componentes -->
     
     <script>
         window.App = {
@@ -65,13 +66,78 @@
                     const html = await response.text();
                     console.log('Dashboard cargado correctamente');
                     
-                    document.getElementById('dashboard-app').innerHTML = html;
+                    // 1. Crear elemento temporal para extraer scripts
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = html;
+                    
+                    // 2. Extraer scripts ANTES de procesar
+                    const scripts = Array.from(tempDiv.querySelectorAll('script'));
+                    const externalScripts = [];
+                    const inlineScripts = [];
+                    
+                    scripts.forEach(script => {
+                        if (script.src) {
+                            externalScripts.push(script.src);
+                        } else if (script.textContent.trim()) {
+                            inlineScripts.push(script.textContent);
+                        }
+                        script.remove();
+                    });
+                    
+                    // 3. Reemplazar x-data temporalmente
+                    let processedHtml = tempDiv.innerHTML.replace(/x-data=/g, 'data-x-data-deferred=');
+                    document.getElementById('dashboard-app').innerHTML = processedHtml;
                     document.getElementById('loadingScreen').style.display = 'none';
 
+                    // 4. Función para cargar scripts externos secuencialmente
+                    const loadScript = (src) => {
+                        return new Promise((resolve) => {
+                            const s = document.createElement('script');
+                            s.src = src;
+                            s.onload = resolve;
+                            s.onerror = resolve;
+                            document.body.appendChild(s);
+                        });
+                    };
+                    
+                    // 5. Cargar scripts externos en orden (excepto dashboard.js y Alpine)
+                    for (const src of externalScripts) {
+                        if (!src.includes('dashboard.js') && !src.includes('alpinejs')) {
+                            console.log('Cargando:', src);
+                            await loadScript(src);
+                        }
+                    }
+                    
+                    // 6. Ejecutar scripts inline (excepto los de window.App que ya están)
+                    for (const code of inlineScripts) {
+                        if (!code.includes('window.App')) {
+                            try {
+                                const fn = new Function(code);
+                                fn();
+                            } catch(e) {
+                                console.error('Error script inline:', e);
+                            }
+                        }
+                    }
+                    
+                    // 7. Cargar dashboard.js
                     const script = document.createElement('script');
                     script.src = '{{ asset('js/dashboard.js') }}';
-                    script.onload = () => {
+                    script.onload = async () => {
                         console.log('Dashboard JS cargado');
+                        
+                        // 8. Restaurar x-data ANTES de cargar Alpine
+                        document.querySelectorAll('[data-x-data-deferred]').forEach(el => {
+                            const value = el.getAttribute('data-x-data-deferred');
+                            el.removeAttribute('data-x-data-deferred');
+                            el.setAttribute('x-data', value);
+                        });
+                        
+                        // 9. Cargar Alpine.js DESPUÉS de restaurar x-data y tener todos los componentes
+                        console.log('Cargando Alpine.js...');
+                        await loadScript('https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js');
+                        console.log('Alpine.js cargado e inicializado');
+                        
                         if (typeof DashboardSPA !== 'undefined') {
                             window.dashboardSPA = new DashboardSPA();
                         }
